@@ -126,10 +126,10 @@ function monogramTexture() {
   g.fillStyle = grad;
   g.fill();
   g.fillStyle = '#0b1205';
-  g.font = '700 140px "Space Grotesk", system-ui, sans-serif';
+  g.font = '700 108px "Space Grotesk", system-ui, sans-serif';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText('N', 128, 136);
+  g.fillText('SP', 128, 134);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
