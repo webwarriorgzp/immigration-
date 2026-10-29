@@ -1,30 +1,208 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Showcase</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Northcart Studio — Shopify Development Agency</title>
+  <meta name="description" content="Northcart Studio designs and builds high-converting Shopify and Shopify Plus stores: custom themes, headless Hydrogen builds, migrations and CRO.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <img src="your-image.png" alt="High-Quality Image">
+  <!-- 3D layer (Three.js) -->
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="scene-fallback" aria-hidden="true"></div>
+
+  <!-- UI layer -->
+  <header class="nav">
+    <a href="#hero" class="brand"><span class="brand-mark">N</span>Northcart<span class="brand-dim">Studio</span></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#process">Process</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="#contact" class="btn btn-small">Book a call</a>
+  </header>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="container hero-inner">
+        <p class="eyebrow reveal">Shopify &amp; Shopify Plus Experts</p>
+        <h1 class="hero-title reveal">We build Shopify stores that <span class="accent">actually sell.</span></h1>
+        <p class="hero-sub reveal">Custom themes, headless storefronts and conversion-focused design for brands ready to scale — from first launch to nine-figure GMV.</p>
+        <div class="hero-ctas reveal">
+          <a href="#contact" class="btn">Start your project</a>
+          <a href="#work" class="btn btn-ghost">See our work</a>
+        </div>
+        <ul class="hero-tags reveal">
+          <li>Online Store 2.0</li>
+          <li>Hydrogen &amp; Oxygen</li>
+          <li>Shopify Plus</li>
+          <li>Checkout Extensibility</li>
+        </ul>
+      </div>
+      <a href="#services" class="scroll-hint" aria-label="Scroll to services"><span></span></a>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Theme development</span><span>Headless commerce</span><span>Store migrations</span><span>Conversion optimisation</span><span>Custom apps</span><span>Speed audits</span><span>B2B wholesale</span><span>Subscriptions</span>
+        <span>Theme development</span><span>Headless commerce</span><span>Store migrations</span><span>Conversion optimisation</span><span>Custom apps</span><span>Speed audits</span><span>B2B wholesale</span><span>Subscriptions</span>
+      </div>
+    </div>
+
+    <section id="services" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">What we do</p>
+          <h2>Everything your store needs, <br>under one roof.</h2>
+        </div>
+        <div class="grid services-grid">
+          <article class="card reveal">
+            <div class="card-icon">◆</div>
+            <h3>Custom Theme Development</h3>
+            <p>Pixel-perfect, lightning-fast Online Store 2.0 themes with sections your team can edit without a developer.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-icon">✦</div>
+            <h3>Shopify Plus</h3>
+            <p>Checkout extensions, Shopify Functions, B2B, multi-store and Markets setups for high-volume brands.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-icon">⬡</div>
+            <h3>Headless &amp; Hydrogen</h3>
+            <p>React-powered Hydrogen storefronts deployed on Oxygen for total creative freedom and sub-second loads.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-icon">⇄</div>
+            <h3>Platform Migration</h3>
+            <p>Move from WooCommerce, Magento or BigCommerce with products, customers, orders and SEO intact.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-icon">↗</div>
+            <h3>CRO &amp; Speed</h3>
+            <p>Data-led A/B testing, Core Web Vitals fixes and UX audits that turn more visitors into customers.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-icon">⚙</div>
+            <h3>Apps &amp; Integrations</h3>
+            <p>Custom public and private apps, ERP, 3PL and CRM integrations built on the Shopify Admin API.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="work" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Selected work</p>
+          <h2>Stores we&rsquo;re proud of.</h2>
+        </div>
+        <!-- Replace these sample projects with your real case studies. -->
+        <div class="grid work-grid">
+          <article class="work-card reveal">
+            <div class="work-thumb" style="--c1:#9be15d;--c2:#2dd4bf"><span>Skincare</span></div>
+            <div class="work-body">
+              <h3>Aurora Skin</h3>
+              <p>Custom OS 2.0 theme with a quiz-driven routine builder and subscriptions.</p>
+              <div class="work-stats"><span><b>+38%</b> conversion</span><span><b>1.2s</b> LCP</span></div>
+            </div>
+          </article>
+          <article class="work-card reveal">
+            <div class="work-thumb" style="--c1:#f7b267;--c2:#f25f5c"><span>Apparel</span></div>
+            <div class="work-body">
+              <h3>Trailmark Outfitters</h3>
+              <p>Magento to Shopify Plus migration with B2B wholesale and Markets in 6 regions.</p>
+              <div class="work-stats"><span><b>2.4×</b> revenue</span><span><b>0</b> SEO loss</span></div>
+            </div>
+          </article>
+          <article class="work-card reveal">
+            <div class="work-thumb" style="--c1:#a78bfa;--c2:#60a5fa"><span>Home</span></div>
+            <div class="work-body">
+              <h3>Loom &amp; Lumen</h3>
+              <p>Headless Hydrogen storefront with 3D product previews and custom bundles.</p>
+              <div class="work-stats"><span><b>+52%</b> AOV</span><span><b>98</b> Lighthouse</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="process" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">How we work</p>
+          <h2>From kickoff to launch <br>in weeks, not months.</h2>
+        </div>
+        <ol class="process">
+          <li class="reveal"><span class="step">01</span><div><h3>Discover</h3><p>Workshops, analytics review and competitor research to define what success looks like.</p></div></li>
+          <li class="reveal"><span class="step">02</span><div><h3>Design</h3><p>Wireframes and high-fidelity Figma designs, tested against real shopper journeys.</p></div></li>
+          <li class="reveal"><span class="step">03</span><div><h3>Build</h3><p>Clean, documented code with weekly demos on a live preview store.</p></div></li>
+          <li class="reveal"><span class="step">04</span><div><h3>Launch &amp; Grow</h3><p>QA, zero-downtime launch and ongoing CRO retainers to keep revenue climbing.</p></div></li>
+        </ol>
+
+        <!-- Replace these figures with your agency's real numbers. -->
+        <div class="stats">
+          <div class="stat reveal"><b data-count="120" data-suffix="+">0</b><span>Stores launched</span></div>
+          <div class="stat reveal"><b data-count="40" data-prefix="$" data-suffix="M+">0</b><span>Client revenue powered</span></div>
+          <div class="stat reveal"><b data-count="35" data-suffix="%">0</b><span>Avg. conversion uplift</span></div>
+          <div class="stat reveal"><b data-count="8" data-suffix=" yrs">0</b><span>Building on Shopify</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact">
+      <div class="container contact-inner">
+        <div class="contact-copy reveal">
+          <p class="eyebrow">Let&rsquo;s talk</p>
+          <h2>Ready to build a store <br>that <span class="accent">sells?</span></h2>
+          <p class="muted">Tell us about your brand and goals. We reply within one business day with next steps and a ballpark estimate.</p>
+          <ul class="contact-list">
+            <li>hello@northcart.studio</li>
+            <li>Remote-first · Worldwide clients</li>
+          </ul>
+        </div>
+        <form class="contact-form reveal" id="contact-form">
+          <label>Name<input name="name" type="text" required autocomplete="name"></label>
+          <label>Email<input name="email" type="email" required autocomplete="email"></label>
+          <label>Store URL <span class="muted">(optional)</span><input name="store" type="url" placeholder="https://"></label>
+          <label>Budget
+            <select name="budget">
+              <option>$5k – $15k</option>
+              <option>$15k – $40k</option>
+              <option>$40k – $100k</option>
+              <option>$100k+</option>
+            </select>
+          </label>
+          <label>Project details<textarea name="message" rows="4" required></textarea></label>
+          <button type="submit" class="btn">Send enquiry</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a href="#hero" class="brand"><span class="brand-mark">N</span>Northcart<span class="brand-dim">Studio</span></a>
+      <p class="muted">© <span id="year"></span> Northcart Studio. Independent Shopify development agency.</p>
+    </div>
+  </footer>
+
+  <!-- Animation layer (GSAP + ScrollTrigger) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
