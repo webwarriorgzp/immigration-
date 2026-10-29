@@ -385,13 +385,25 @@ function initReveals() {
 }
 
 function initForm() {
-  // Front-end only: connect this to your form backend (e.g. Formspree, Netlify Forms or a Shopify app).
+  // No form backend yet: open the visitor's email app with the enquiry pre-filled.
+  // Swap this for Formspree, Netlify Forms or similar to receive submissions directly.
+  const CONTACT_EMAIL = 'hello@shopifydeveloperpro.com';
   const form = document.getElementById('contact-form');
   const status = form.querySelector('.form-status');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    status.textContent = 'Thanks! We’ll be in touch within one business day.';
-    form.reset();
+    const data = new FormData(form);
+    const subject = `Project enquiry from ${data.get('name')}`;
+    const body = [
+      `Name: ${data.get('name')}`,
+      `Email: ${data.get('email')}`,
+      `Store URL: ${data.get('store') || '-'}`,
+      `Budget: ${data.get('budget')}`,
+      '',
+      data.get('message'),
+    ].join('\n');
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    status.textContent = `Your email app should open with your message. If it doesn’t, email us at ${CONTACT_EMAIL}.`;
   });
 }
 

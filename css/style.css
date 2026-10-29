@@ -151,6 +151,8 @@ main, .nav, .footer { position: relative; z-index: 1; }
 .contact-copy h2 { margin-bottom: 22px; }
 .contact-copy .muted { max-width: 44ch; margin-bottom: 28px; }
 .contact-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; color: var(--text); }
+.contact-list a, .footer p a { color: var(--accent); }
+.contact-list a:hover, .footer p a:hover { text-decoration: underline; }
 .contact-form { display: grid; gap: 16px; padding: 32px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface-solid); }
 .contact-form label { display: grid; gap: 8px; font-size: 0.85rem; font-weight: 500; }
 .contact-form input,
