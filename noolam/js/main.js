@@ -54,15 +54,14 @@ setActive('home');
     img.style.objectPosition = HERO.focus;
     img.style.transformOrigin = HERO.focus;
     $('.hero-stage').insertBefore(photo, $('.hero-copy'));
-    const desktop = matchMedia('(min-width: 801px)').matches;
-    tl.fromTo(img, { scale: 2.8 }, { scale: 1, duration: 1 }, 0);
-    if (desktop) {
-      const vw = (n) => () => innerWidth * n / 100, vh = (n) => () => innerHeight * n / 100;
-      tl.fromTo(photo,
-        { top: 0, right: 0, bottom: 0, width: () => innerWidth, borderRadius: '0px 0px 0px 0px' },
-        { top: vh(12), right: vw(6), bottom: vh(6), width: () => Math.min(innerWidth * 0.38, innerHeight * 0.52), borderRadius: '999px 999px 24px 24px', duration: 0.9, ease: 'power1.inOut' }, 0);
+    $('.hero-showroom').style.backgroundImage = `url(${HERO.img})`;
+    $('.hero-showroom').classList.add('photo-backdrop');
+    tl.fromTo(img, { scale: 3 }, { scale: 1, duration: 1 }, 0);
+    if (matchMedia('(min-width: 801px)').matches) {
+      // Wide screens: the portrait photo settles into a full-height panel on the right.
+      tl.fromTo(photo, { width: () => innerWidth }, { width: () => Math.min(innerHeight * 0.68, innerWidth * 0.5), duration: 0.85, ease: 'power1.inOut' }, 0);
     } else {
-      tl.fromTo(photo, { '--shade': 0 }, { '--shade': 1, duration: 0.6 }, 0.4);
+      tl.fromTo(photo, { '--shade': 0 }, { '--shade': 1, duration: 0.5 }, 0.35);
     }
     tl.fromTo('.hero-showroom', { scale: 1.3 }, { scale: 1, duration: 1 }, 0)
       .from('.hero-copy > *', { y: 40, opacity: 0, stagger: 0.06, duration: 0.3 }, 0.6)
@@ -110,18 +109,21 @@ setActive('home');
     lineup.classList.add('has-focus');
     const l = LOOKS[i], s = SILKS[l.silk];
     const total = l.pieces.reduce((a, [, p]) => a + p, 0);
-    panel.innerHTML = `${l.thumb ? `<img class="look-thumb" src="${l.thumb}" alt="${l.name}, detail">` : ''}
+    panel.innerHTML = `${l.thumb && !photoMode ? `<img class="look-thumb" src="${l.thumb}" alt="${l.name}, detail">` : ''}
       <p class="eyebrow">Look ${String(i + 1).padStart(2, '0')}</p>
       <h3>${l.name}</h3>
       <p class="silk-tag"><span class="dot" style="background:${s.base}"></span>${s.name}</p>
       <ul>${l.pieces.map(([n, p]) => `<li><span>${n}</span><b>${inr(p)}</b></li>`).join('')}</ul>
       ${l.pieces.length > 1 ? `<p class="total"><span>Complete look</span><span>${inr(total)}</span></p>` : ''}
       <a href="${l.url || '#footer'}" class="btn" ${l.url ? 'target="_blank" rel="noopener"' : ''}>Shop the look</a>`;
+    if (photoMode) panel.insertAdjacentHTML('beforeend', `<p class="look-list-label">All looks</p><ol class="look-list">${LOOKS.map((x, j) =>
+      `<li><button data-j="${j}" class="${j === i ? 'on' : ''}"><img src="${x.thumb || x.img}" alt=""><span>${x.name}<small>${inr(x.pieces[0][1])}</small></span></button></li>`).join('')}</ol>`);
     gsap.fromTo(panel.children, { y: 12, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.04, duration: 0.35, overwrite: true });
   }
   panel.innerHTML = `<p class="eyebrow">Shop the look</p><h3>Pick a muse</h3><p class="hint">Hover or tap any model to see every piece she's wearing, with prices.</p>`;
   if (photoMode) show(0), lineup.classList.remove('has-focus');
 
+  panel.addEventListener('click', (e) => { const b = e.target.closest('.look-list button'); if (b) { show(+b.dataset.j); models[+b.dataset.j].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } });
   models.forEach((m, i) => {
     m.addEventListener('mouseenter', () => show(i));
     m.addEventListener('focus', () => show(i));
@@ -139,7 +141,7 @@ setActive('home');
   CARDS.forEach((c, i) => {
     const s = SILKS[c.silk];
     track.appendChild(h(`<article class="silk-card" style="background:${c.bg}">
-      <div class="word" style="color:${shade(s.base, -10)}">${c.word}</div>
+      <div class="word">${c.word}</div>
       <div class="figure${c.img ? ' photo' : ''}">${figure({ ...c, name: c.title }, i + 2)}</div>
       <div class="meta"><div><small>${c.title || s.name}</small><strong>${inr(c.price)}</strong></div>
       <button class="plus" aria-label="Add ${s.name} to bag">+</button></div></article>`));
@@ -152,10 +154,11 @@ setActive('home');
     x: () => -distance(), ease: 'none',
     scrollTrigger: { trigger: '.silks', start: 'top top', end: () => '+=' + distance(), scrub: 0.6, pin: '.silks-pin', invalidateOnRefresh: true },
   });
-  // Per-card tilt + bob while the track moves.
+  // Cards swing through a 3D arc: angled in, flat at centre, angled out.
   cards.forEach((card, i) => {
-    gsap.fromTo(card, { rotate: i % 2 ? 4 : -4, y: i % 2 ? 30 : -10 }, {
-      rotate: i % 2 ? -3 : 3, y: i % 2 ? -10 : 20, ease: 'none',
+    gsap.set(card, { rotateY: 34, z: -180, rotateZ: 2 });
+    gsap.to(card, {
+      keyframes: [{ rotateY: 0, z: 0, rotateZ: 0, ease: 'sine.out' }, { rotateY: -34, z: -180, rotateZ: -2, ease: 'sine.in' }], ease: 'none',
       scrollTrigger: { trigger: card, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true },
     });
   });
@@ -291,7 +294,7 @@ const HANGER = `<svg class="hanger" viewBox="0 0 200 60" aria-hidden="true"><pat
   REELS.forEach((r) => track.appendChild(h(`<div class="story-card" style="background-image:${bgFor(r)}">
     <div class="bar"><i></i></div>
     <div class="head"><span class="avatar">N</span>noolam.silks<button class="mute" aria-label="Mute">🔇</button></div>
-    <p class="caption">${r.title}</p></div>`)));
+    <div class="caption"><p>${r.title}</p><a href="#rack" class="story-shop">Shop this look</a></div></div>`)));
   const cards = [...track.children];
   let idx = 0, lastFocus = null;
 
@@ -309,6 +312,7 @@ const HANGER = `<svg class="hanger" viewBox="0 0 200 60" aria-hidden="true"><pat
       c.getAnimations().forEach((an) => an.cancel());
     });
     bg.style.backgroundColor = REELS[idx].tint;
+    bg.style.backgroundImage = REELS[idx].img ? `url(${REELS[idx].img})` : 'none';
     cards[idx].animate([{ backgroundPosition: '50% 0%' }, { backgroundPosition: '50% 100%' }], { duration: 6000, fill: 'forwards' });
   }
   const go = (i) => { idx = (i + cards.length) % cards.length; layout(); };
@@ -325,7 +329,9 @@ const HANGER = `<svg class="hanger" viewBox="0 0 200 60" aria-hidden="true"><pat
   }
   row.addEventListener('click', (e) => { const r = e.target.closest('.reel'); if (r) open(+r.dataset.i); });
   cards.forEach((c, i) => {
-    c.addEventListener('click', (e) => { if (e.target.closest('.mute')) { e.target.textContent = e.target.textContent === '🔇' ? '🔊' : '🔇'; return; } if (i !== idx) go(i); });
+    c.addEventListener('click', (e) => {
+      if (e.target.closest('.story-shop')) { e.preventDefault(); close(); lenis ? lenis.scrollTo('#rack') : $('#rack').scrollIntoView(); return; }
+      if (e.target.closest('.mute')) { e.target.textContent = e.target.textContent === '🔇' ? '🔊' : '🔇'; return; } if (i !== idx) go(i); });
     c.querySelector('.bar i').addEventListener('animationend', () => { if (i === idx && !story.hidden) go(idx + 1); });
   });
   $('#story-close').addEventListener('click', close);
@@ -366,15 +372,36 @@ const HANGER = `<svg class="hanger" viewBox="0 0 200 60" aria-hidden="true"><pat
 
 /* ---------------- 8. The weave ---------------- */
 (function weave() {
-  $('#swatches').innerHTML = WEAVE.map((k) => `<i style="background-image:url(${silkURL(k, { w: 128, h: 128 })})" title="${SILKS[k].name}"></i>`).join('');
+  const loom = [0, 1, 2];      // indexes into WEAVE currently on the three strands
+  let next = 0, scene = null, visible = false;
   const state = { progress: 0 };
-  const scene = initWeave($('#weave-canvas'), WEAVE.map((k) => silkTexture(k, { w: 1024, h: 256 })), state);
+  const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+  const srcFor = (w) => (w.tex ? loadImg(w.tex) : Promise.resolve(silkTexture(w.silk, { w: 1024, h: 256 })));
+  const thumb = (w) => w.tex || silkURL(w.silk, { w: 128, h: 128 });
+
+  const sw = $('#swatches');
+  sw.innerHTML = WEAVE.map((w, j) => `<button role="radio" data-j="${j}" style="background-image:url(${thumb(w)})" aria-label="${w.name}, ${inr(w.price)}" title="${w.name}"></button>`).join('');
+  function render() {
+    sw.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', loom.includes(+b.dataset.j)));
+    $('#weave-list').innerHTML = loom.map((j, n) => `<li><span class="dot" style="background-image:url(${thumb(WEAVE[j])})"></span><span>${String(n + 1).padStart(2, '0')} ${WEAVE[j].name}</span><b>${inr(WEAVE[j].price)}</b></li>`).join('');
+    $('#weave-name').textContent = loom.map((j) => WEAVE[j].name).join(' · ');
+    $('#weave-price').textContent = inr(loom.reduce((a, j) => a + WEAVE[j].price, 0));
+  }
+  sw.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const j = +b.dataset.j; if (loom.includes(j)) return;
+    const slot = next; next = (next + 1) % 3; loom[slot] = j; render();
+    srcFor(WEAVE[j]).then((src) => scene?.setTexture(slot, src));
+  });
+  render();
+
+  Promise.all(loom.map((j) => srcFor(WEAVE[j]))).then((srcs) => {
+    scene = initWeave($('#weave-canvas'), srcs, state);
+    if (visible) scene?.setActive(true);
+  });
   gsap.timeline({ scrollTrigger: { trigger: '.weave', start: 'top top', end: '+=200%', scrub: 0.8, pin: '.weave-pin' } })
-    .to(state, { progress: 1, ease: 'none', duration: 1 }, 0)
-    .to('.weave-copy', { opacity: 0, y: -40, duration: 0.25 }, 0.55)
-    .to('#weave-result', { opacity: 1, duration: 0.2 }, 0.8)
-    .from('#swatches i', { scale: 0, stagger: 0.03, duration: 0.15 }, 0.8);
-  ScrollTrigger.create({ trigger: '.weave', start: 'top bottom', end: 'bottom top', onToggle: (st) => scene?.setActive(st.isActive) });
+    .to(state, { progress: 1, ease: 'none', duration: 1 }, 0);
+  ScrollTrigger.create({ trigger: '.weave', start: 'top bottom', end: 'bottom top', onToggle: (st) => { visible = st.isActive; scene?.setActive(st.isActive); } });
 })();
 
 /* ---------------- Section reveals + nav state ---------------- */

@@ -5,6 +5,16 @@ import * as THREE from 'three';
 
 const SEG_U = 260, SEG_V = 14;
 
+function makeTexture(src) {
+  const tex = new THREE.Texture(src);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.MirroredRepeatWrapping; // hides seams on photo crops
+  tex.repeat.set(4, 1);
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 export function initWeave(canvas, textures, state) {
   let renderer;
   try {
@@ -25,12 +35,8 @@ export function initWeave(canvas, textures, state) {
   const rim = new THREE.DirectionalLight(0xffc8d8, 1.4); rim.position.set(-6, -2, -4); scene.add(rim);
 
   const L = 22, W = 1.25;
-  const ribbons = textures.map((canvasTex, i) => {
-    const tex = new THREE.CanvasTexture(canvasTex);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.repeat.set(5, 1);
-    tex.anisotropy = 4;
+  const ribbons = textures.map((src, i) => {
+    const tex = makeTexture(src);
     const geo = new THREE.PlaneGeometry(L, W, SEG_U, SEG_V);
     const mat = new THREE.MeshPhysicalMaterial({
       map: tex, side: THREE.DoubleSide, roughness: 0.42, metalness: 0.05,
@@ -104,6 +110,11 @@ export function initWeave(canvas, textures, state) {
   update(0); renderer.render(scene, camera);
 
   return {
+    setTexture(i, src) {
+      const m = ribbons[i].mesh.material;
+      m.map?.dispose(); m.map = makeTexture(src); m.needsUpdate = true;
+      if (!active) renderer.render(scene, camera);
+    },
     setActive(on) {
       if (on === active) return;
       active = on;

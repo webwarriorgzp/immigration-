@@ -14,7 +14,7 @@ Run it with any static server from this folder, e.g. `python3 -m http.server`, t
 | 5 | Feel the drape | Parallax columns around a central clip (canvas placeholder) |
 | 6 | Silk, in motion | Reel cards open a story viewer with 3D side cards, a tinted backdrop, auto-advance, swipe and keyboard controls |
 | 7 | Bridal | Arch cards fan out on scroll |
-| 8 | Three silks, one weave | Three.js ribbons (CPU-deformed planes, sheen material) blend from free flow into a braid as you scroll |
+| 8 | Three silks, one weave | Three.js ribbons textured with real fabric crops blend from free flow into a braid as you scroll. "Choose a silk" swaps a strand and updates the price |
 
 ## Photography
 The product photos in `assets/` come from cult91.com. They're downsized to 900px JPEGs, and each look, card, rack item and reel uses its real product name and price. "Shop the look" links to the product page on cult91.com. Try the Look uses an expanding accordion because the photos have solid backgrounds, not transparent cut-outs.

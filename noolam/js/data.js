@@ -37,12 +37,12 @@ export const LOOKS = [
 ];
 
 export const CARDS = [
-  { silk: 'magenta', word: 'RANI',    title: 'Rani Pink Mirror Work Kurta Set', price: 7999, bg: '#f7c3dc', img: A('rani-pink-mirror-work-kurta-with-zari-pr-1.jpg') },
-  { silk: 'maroon',  word: 'RED',     title: 'Red Silk Suit, Gold Floral',      price: 6599, bg: '#f3c6cf', img: A('red-silk-suit-with-gold-floral-embroider-1.jpg') },
-  { silk: 'teal',    word: 'TEAL',    title: 'Teal Blue Kurta Pant Set',        price: 2799, bg: '#bfe6e2', img: A('teal-blue-embroidered-kurta-pant-set-wit-1.jpg') },
-  { silk: 'sindoor', word: 'ORANGE',  title: 'Orange Shaded Sequin Suit',       price: 5999, bg: '#ffd2b8', img: A('orange-shaded-suit-with-sequin-embellish-1.jpg') },
-  { silk: 'magenta', word: 'SHIBORI', title: 'Pink Shibori Mirror Kurta',       price: 5999, bg: '#f9d0e4', img: A('pink-shibori-tie-dye-kurta-with-heavy-mi-1.jpg') },
-  { silk: 'peacock', word: 'ROYAL',   title: 'Royal Blue Mirror Work Suit',     price: 6599, bg: '#c7d3f4', img: A('royal-blue-traditional-suit-with-mirror--1.jpg') },
+  { silk: 'magenta', word: 'RANI',    title: 'Rani Pink Mirror Work Kurta Set', price: 7999, bg: '#d6157a', img: A('rani-pink-mirror-work-kurta-with-zari-pr-1.jpg') },
+  { silk: 'maroon',  word: 'RED',     title: 'Red Silk Suit, Gold Floral',      price: 6599, bg: '#c8161d', img: A('red-silk-suit-with-gold-floral-embroider-1.jpg') },
+  { silk: 'teal',    word: 'TEAL',    title: 'Teal Blue Kurta Pant Set',        price: 2799, bg: '#0e8a80', img: A('teal-blue-embroidered-kurta-pant-set-wit-1.jpg') },
+  { silk: 'sindoor', word: 'ORANGE',  title: 'Orange Shaded Sequin Suit',       price: 5999, bg: '#f2701d', img: A('orange-shaded-suit-with-sequin-embellish-1.jpg') },
+  { silk: 'magenta', word: 'SHIBORI', title: 'Pink Shibori Mirror Kurta',       price: 5999, bg: '#7a2bd6', img: A('pink-shibori-tie-dye-kurta-with-heavy-mi-1.jpg') },
+  { silk: 'peacock', word: 'ROYAL',   title: 'Royal Blue Mirror Work Suit',     price: 6599, bg: '#1f58d6', img: A('royal-blue-traditional-suit-with-mirror--1.jpg') },
 ];
 
 export const RACK_FILTERS = [
@@ -98,4 +98,15 @@ export const BRIDAL = [
   { name: 'Ivory Anarkali',   silk: 'ivory',   img: A('ivory-sequin-embroidered-anarkali-suit-s-1.jpg') },
 ];
 
-export const WEAVE = ['maroon', 'magenta', 'mango'];
+// Three silks, one weave: real fabric crops from the photos, plus extra choices.
+// The first three start on the loom; picking a swatch swaps it into the next strand.
+export const WEAVE = [
+  { name: 'Black & Gold Silk', silk: 'noir',    tex: A('fabric-black-gold.jpg'), price: 7999 },
+  { name: 'Orange Tussar',     silk: 'orange',  tex: A('fabric-orange.jpg'),     price: 7199 },
+  { name: 'Violet Silk',       silk: 'violet',  tex: A('fabric-violet.jpg'),     price: 4480 },
+  { name: 'Koorai Check',      silk: 'koorai',  price: 6200 },
+  { name: 'Teal Tussar',       silk: 'teal',    price: 7199 },
+  { name: 'Rani Pink',         silk: 'magenta', price: 5400 },
+  { name: 'Mustard Gold',      silk: 'mango',   price: 4900 },
+  { name: 'Royal Blue',        silk: 'peacock', price: 5800 },
+];
