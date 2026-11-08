@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOOLAM — Kanchipuram Silk</title>
+  <meta name="description" content="NOOLAM: Kanchipuram silk sarees, woven for the divine. A scroll-driven showcase prototype.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Floating pill nav -->
+  <header class="nav" id="nav">
+    <a href="#home" class="wordmark" aria-label="NOOLAM home">NOOLAM</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#look" data-nav="look">Try the Look</a>
+      <a href="#silks" data-nav="silks">Pick a Silk</a>
+      <a href="#rack" data-nav="rack">The Rack</a>
+      <a href="#muse" data-nav="muse">The Muse</a>
+      <a href="#bridal" data-nav="bridal">Bridal</a>
+      <a href="#weave" data-nav="weave">The Weave</a>
+    </nav>
+    <a href="#footer" class="nav-cta">Visit the Store</a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+  </header>
+
+  <main>
+    <!-- 1. HERO: silk close-up pulls back into the showroom -->
+    <section class="hero" id="home" data-section="home">
+      <div class="hero-stage">
+        <div class="hero-showroom" aria-hidden="true">
+          <div class="showroom-shelves"></div>
+          <div class="showroom-light"></div>
+        </div>
+        <div class="hero-silk" aria-hidden="true"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">Kanchipuram · Since 1962</p>
+          <h1 class="hero-title"><span>Woven for</span> <em class="accent">the Divine.</em></h1>
+          <p class="hero-sub">Pure mulberry silk, real zari, and six yards of patience on every loom.</p>
+          <a href="#look" class="btn">Explore the collection</a>
+        </div>
+        <div class="scroll-hint" aria-hidden="true">Scroll</div>
+      </div>
+    </section>
+
+    <!-- 2. TRY THE LOOK: lineup, focus one model -->
+    <section class="look" id="look" data-section="look">
+      <div class="section-head">
+        <p class="eyebrow">The Lineup</p>
+        <h2>Try the <em class="accent">Look</em></h2>
+        <p class="lede">Hover or tap a muse to step her forward and shop what she's wearing.</p>
+      </div>
+      <div class="look-wrap">
+        <div class="lineup" id="lineup" role="listbox" aria-label="Looks"></div>
+        <aside class="look-panel" id="look-panel" aria-live="polite"></aside>
+      </div>
+    </section>
+
+    <!-- 3. PICK A SILK: pinned horizontal track -->
+    <section class="silks" id="silks" data-section="silks">
+      <div class="silks-pin">
+        <div class="section-head">
+          <p class="eyebrow">Colour story</p>
+          <h2>Pick a <em class="accent">Silk</em></h2>
+        </div>
+        <div class="silk-track" id="silk-track"></div>
+      </div>
+    </section>
+
+    <!-- 4. THE RACK: filterable clothes rail -->
+    <section class="rack" id="rack" data-section="rack">
+      <div class="section-head">
+        <p class="eyebrow">The Rack</p>
+        <h2>Every silk, <em class="accent">on the rail</em></h2>
+      </div>
+      <div class="chips" id="chips" role="tablist" aria-label="Filter pieces"></div>
+      <div class="rail">
+        <div class="rail-bar" aria-hidden="true"></div>
+        <ul class="rail-items" id="rail-items"></ul>
+      </div>
+    </section>
+
+    <!-- 5. FEEL THE DRAPE: parallax grid around a central video -->
+    <section class="drape" id="muse" data-section="muse">
+      <div class="section-head">
+        <p class="eyebrow">The Muse</p>
+        <h2>Feel the <em class="accent">drape</em></h2>
+      </div>
+      <div class="drape-grid">
+        <div class="drape-col" data-speed="-60"><div class="tile" data-tile="0"></div><div class="tile tall" data-tile="1"></div></div>
+        <div class="drape-col" data-speed="40"><div class="tile tall" data-tile="2"></div><div class="tile" data-tile="3"></div></div>
+        <div class="drape-center">
+          <!-- Drop your draping clip here: <video src="assets/drape.mp4" autoplay muted loop playsinline></video> -->
+          <canvas id="drape-canvas" aria-label="Saree being draped (placeholder animation)"></canvas>
+          <span class="drape-label">Six yards, one pleat at a time</span>
+        </div>
+        <div class="drape-col" data-speed="40"><div class="tile" data-tile="4"></div><div class="tile tall" data-tile="5"></div></div>
+        <div class="drape-col" data-speed="-60"><div class="tile tall" data-tile="6"></div><div class="tile" data-tile="7"></div></div>
+      </div>
+    </section>
+
+    <!-- 6. SILK, IN MOTION: reels + story viewer -->
+    <section class="reels" id="reels">
+      <div class="section-head">
+        <p class="eyebrow">On the gram</p>
+        <h2>Silk, <em class="accent">in motion</em></h2>
+      </div>
+      <div class="reel-row" id="reel-row"></div>
+    </section>
+
+    <!-- 7. BRIDAL: arch cards fan out -->
+    <section class="bridal" id="bridal" data-section="bridal">
+      <div class="section-head">
+        <p class="eyebrow">For the muhurtham</p>
+        <h2>The Bridal <em class="accent">Collection</em></h2>
+      </div>
+      <div class="arches" id="arches"></div>
+    </section>
+
+    <!-- 8. THREE SILKS, ONE WEAVE: Three.js ribbons -->
+    <section class="weave" id="weave" data-section="weave">
+      <div class="weave-pin">
+        <canvas id="weave-canvas" aria-hidden="true"></canvas>
+        <div class="weave-copy">
+          <p class="eyebrow">The Weave</p>
+          <h2>Three silks, <em class="accent">one weave</em></h2>
+          <p class="lede">Body, border and pallu are woven separately and interlocked by hand: the korvai join.</p>
+        </div>
+        <div class="weave-result" id="weave-result">
+          <div class="swatches" id="swatches"></div>
+          <p class="weave-name">The Korvai Trio</p>
+          <p class="weave-price">₹ 48,500</p>
+          <a href="#footer" class="btn">Reserve this weave</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="footer">
+    <p class="footer-line">Woven with heritage.<br><em>Draped for today.</em></p>
+    <div class="footer-cols">
+      <div><h3>Store</h3><p>12 Gandhi Road, Kanchipuram<br>Open daily, 10am – 9pm</p></div>
+      <div><h3>Contact</h3><p>+91 00000 00000<br>hello@noolam.example</p></div>
+      <div><h3>Follow</h3><p>Instagram · YouTube · Pinterest</p></div>
+    </div>
+    <div class="footer-mark" aria-hidden="true">NOOLAM</div>
+    <p class="footer-small">A fictional brand. Prototype with placeholder art; swap in your own assets in <code>js/data.js</code>.</p>
+  </footer>
+
+  <!-- Story viewer -->
+  <div class="story" id="story" role="dialog" aria-modal="true" aria-label="Reel viewer" hidden>
+    <div class="story-bg" id="story-bg"></div>
+    <div class="story-track" id="story-track"></div>
+    <button class="story-close" id="story-close" aria-label="Close">×</button>
+    <button class="story-nav prev" id="story-prev" aria-label="Previous reel">‹</button>
+    <button class="story-nav next" id="story-next" aria-label="Next reel">›</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
