@@ -1,4 +1,4 @@
-import { SILKS, LOOKS, CARDS, RACK, RACK_FILTERS, REELS, BRIDAL, WEAVE } from './data.js';
+import { SILKS, HERO, LOOKS, CARDS, RACK, RACK_FILTERS, DRAPE, REELS, BRIDAL, WEAVE } from './data.js';
 import { silkTexture, silkURL, modelSVG, garmentSVG, shade, inr } from './placeholders.js';
 import { initWeave } from './weave.js';
 
@@ -40,6 +40,36 @@ setActive('home');
 
 /* ---------------- 1. Hero ---------------- */
 (function hero() {
+  const heroEl = $('.hero');
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140%', scrub: 0.6, pin: true, invalidateOnRefresh: true },
+  });
+
+  if (HERO.img) {
+    // Photo mode: start inside the fabric, pull back until the full look sits in an arch.
+    heroEl.classList.add('has-photo');
+    const photo = h(`<figure class="hero-photo"><img src="${HERO.img}" alt="Model in a handloom silk saree"></figure>`);
+    const img = photo.querySelector('img');
+    img.style.objectPosition = HERO.focus;
+    img.style.transformOrigin = HERO.focus;
+    $('.hero-stage').insertBefore(photo, $('.hero-copy'));
+    const desktop = matchMedia('(min-width: 801px)').matches;
+    tl.fromTo(img, { scale: 2.8 }, { scale: 1, duration: 1 }, 0);
+    if (desktop) {
+      const vw = (n) => () => innerWidth * n / 100, vh = (n) => () => innerHeight * n / 100;
+      tl.fromTo(photo,
+        { top: 0, right: 0, bottom: 0, width: () => innerWidth, borderRadius: '0px 0px 0px 0px' },
+        { top: vh(12), right: vw(6), bottom: vh(6), width: () => Math.min(innerWidth * 0.38, innerHeight * 0.52), borderRadius: '999px 999px 24px 24px', duration: 0.9, ease: 'power1.inOut' }, 0);
+    } else {
+      tl.fromTo(photo, { '--shade': 0 }, { '--shade': 1, duration: 0.6 }, 0.4);
+    }
+    tl.fromTo('.hero-showroom', { scale: 1.3 }, { scale: 1, duration: 1 }, 0)
+      .from('.hero-copy > *', { y: 40, opacity: 0, stagger: 0.06, duration: 0.3 }, 0.6)
+      .to('.scroll-hint', { opacity: 0, duration: 0.15 }, 0);
+    return;
+  }
+
   const shelves = $('.showroom-shelves');
   const keys = Object.keys(SILKS);
   const cols = innerWidth < 700 ? 8 : 14;
@@ -53,11 +83,6 @@ setActive('home');
   }
   const silk = $('.hero-silk');
   silk.style.backgroundImage = `url(${silkURL('maroon', { w: 512, h: 512 })})`;
-
-  const tl = gsap.timeline({
-    defaults: { ease: 'none' },
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140%', scrub: 0.6, pin: true },
-  });
   tl.fromTo(silk, { clipPath: 'inset(0% 0% 0% 0% round 0px)', backgroundSize: '1100px' },
                { clipPath: 'inset(24% 43% 12% 43% round 18px)', backgroundSize: '160px', duration: 1 }, 0)
     .to(silk, { opacity: 0, duration: 0.3 }, 0.5)
@@ -76,21 +101,26 @@ setActive('home');
     lineup.appendChild(el);
   });
   const models = [...lineup.children];
+  const photoMode = LOOKS.every((l) => l.img);
+  // Photo mode: an accordion of tall slices; the chosen look opens to full width.
+  if (photoMode) lineup.classList.add('photo');
 
   function show(i) {
     models.forEach((m, j) => { m.classList.toggle('active', i === j); m.setAttribute('aria-selected', i === j); });
     lineup.classList.add('has-focus');
     const l = LOOKS[i], s = SILKS[l.silk];
     const total = l.pieces.reduce((a, [, p]) => a + p, 0);
-    panel.innerHTML = `<p class="eyebrow">Look ${String(i + 1).padStart(2, '0')}</p>
+    panel.innerHTML = `${l.thumb ? `<img class="look-thumb" src="${l.thumb}" alt="${l.name}, detail">` : ''}
+      <p class="eyebrow">Look ${String(i + 1).padStart(2, '0')}</p>
       <h3>${l.name}</h3>
       <p class="silk-tag"><span class="dot" style="background:${s.base}"></span>${s.name}</p>
       <ul>${l.pieces.map(([n, p]) => `<li><span>${n}</span><b>${inr(p)}</b></li>`).join('')}</ul>
-      <p class="total"><span>Complete look</span><span>${inr(total)}</span></p>
-      <a href="#footer" class="btn">Shop the look</a>`;
+      ${l.pieces.length > 1 ? `<p class="total"><span>Complete look</span><span>${inr(total)}</span></p>` : ''}
+      <a href="${l.url || '#footer'}" class="btn" ${l.url ? 'target="_blank" rel="noopener"' : ''}>Shop the look</a>`;
     gsap.fromTo(panel.children, { y: 12, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.04, duration: 0.35, overwrite: true });
   }
   panel.innerHTML = `<p class="eyebrow">Shop the look</p><h3>Pick a muse</h3><p class="hint">Hover or tap any model to see every piece she's wearing, with prices.</p>`;
+  if (photoMode) show(0), lineup.classList.remove('has-focus');
 
   models.forEach((m, i) => {
     m.addEventListener('mouseenter', () => show(i));
@@ -110,8 +140,8 @@ setActive('home');
     const s = SILKS[c.silk];
     track.appendChild(h(`<article class="silk-card" style="background:${c.bg}">
       <div class="word" style="color:${shade(s.base, -10)}">${c.word}</div>
-      <div class="figure">${figure(c, i + 2)}</div>
-      <div class="meta"><div><small>${s.name}</small><strong>${inr(c.price)}</strong></div>
+      <div class="figure${c.img ? ' photo' : ''}">${figure({ ...c, name: c.title }, i + 2)}</div>
+      <div class="meta"><div><small>${c.title || s.name}</small><strong>${inr(c.price)}</strong></div>
       <button class="plus" aria-label="Add ${s.name} to bag">+</button></div></article>`));
   });
   track.addEventListener('click', (e) => { const b = e.target.closest('.plus'); if (b) b.classList.toggle('added'); });
@@ -132,6 +162,7 @@ setActive('home');
 })();
 
 /* ---------------- 4. The Rack ---------------- */
+const HANGER = `<svg class="hanger" viewBox="0 0 200 60" aria-hidden="true"><path d="M100 4 q12 0 12 12 q0 10 -12 14 l0 10" stroke="#8c7b6a" stroke-width="3" fill="none"/><path d="M30 58 L100 38 L170 58" stroke="#8c7b6a" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;
 (function rack() {
   const chips = $('#chips');
   const list = $('#rail-items');
@@ -143,7 +174,7 @@ setActive('home');
   const render = (f) => {
     list.innerHTML = '';
     RACK.filter((r) => f === 'all' || r.cat === f).forEach((r, i) => {
-      const li = h(`<li class="garment">${r.img ? `<img src="${r.img}" alt="${r.name}">` : garmentSVG(r.cat, r.silk)}
+      const li = h(`<li class="garment${r.img ? ' photo' : ''}">${r.img ? `${HANGER}<img src="${r.img}" alt="${r.name}" loading="lazy">` : garmentSVG(r.cat, r.silk)}
         <p class="tag">${r.name}<b>${inr(r.price)}</b></p></li>`);
       list.appendChild(li);
       if (reduced) return;
@@ -177,6 +208,8 @@ setActive('home');
 (function drape() {
   const keys = ['teal', 'magenta', 'ivory', 'sindoor', 'peacock', 'mango', 'koorai', 'maroon'];
   document.querySelectorAll('.tile').forEach((t) => {
+    const photo = DRAPE.tiles?.[+t.dataset.tile];
+    if (photo) { t.style.backgroundImage = `url(${photo})`; return; }
     const k = keys[+t.dataset.tile];
     t.style.backgroundImage = `url(${silkURL(k, { w: 320, h: 420 })})`;
   });
@@ -188,6 +221,19 @@ setActive('home');
   }
 
   // Placeholder "draping" clip: cloth bands rippling down from the shoulder.
+  const centre = $('.drape-center');
+  if (DRAPE.video) {
+    $('#drape-canvas').replaceWith(h(`<video src="${DRAPE.video}" autoplay muted loop playsinline></video>`));
+    return;
+  }
+  if (DRAPE.slides?.length) {
+    // Crossfading slideshow with a slow push-in, standing in for the draping clip.
+    $('#drape-canvas').replaceWith(h(`<div class="drape-slides">${DRAPE.slides.map((src, i) => `<img src="${src}" alt="" class="${i ? '' : 'on'}" loading="lazy">`).join('')}</div>`));
+    const slides = [...centre.querySelectorAll('.drape-slides img')];
+    let cur = 0;
+    if (!reduced) setInterval(() => { slides[cur].classList.remove('on'); cur = (cur + 1) % slides.length; slides[cur].classList.add('on'); }, 3200);
+    return;
+  }
   const cv = $('#drape-canvas');
   const g = cv.getContext('2d');
   const tex = silkTexture('magenta', { w: 256, h: 256 });
@@ -237,7 +283,7 @@ setActive('home');
 (function reels() {
   const row = $('#reel-row');
   const story = $('#story'), track = $('#story-track'), bg = $('#story-bg');
-  const bgFor = (r) => `url(${silkURL(r.silk, { w: 360, h: 640, border: true })})`;
+  const bgFor = (r) => r.img ? `url(${r.img});background-size:auto 112%;background-position:50% 0%` : `url(${silkURL(r.silk, { w: 360, h: 640, border: true })})`;
   REELS.forEach((r, i) => row.appendChild(h(`<button class="reel" data-i="${i}" style="background-image:${bgFor(r)}" aria-label="Play reel: ${r.title}">
     <span class="play">▶</span><span>${r.title}</span></button>`)));
 
@@ -260,7 +306,7 @@ setActive('home');
       c.style.transform = `translateX(${d * 78}%) translateZ(${-ad * 220}px) rotateY(${-d * 28}deg) scale(${d === 0 ? 1 : 0.86})`;
       // restart progress bar
       const bar = c.querySelector('.bar i'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = '';
-      c.style.backgroundPosition = '50% 0%';
+      c.getAnimations().forEach((an) => an.cancel());
     });
     bg.style.backgroundColor = REELS[idx].tint;
     cards[idx].animate([{ backgroundPosition: '50% 0%' }, { backgroundPosition: '50% 100%' }], { duration: 6000, fill: 'forwards' });
@@ -301,7 +347,9 @@ setActive('home');
 /* ---------------- 7. Bridal arches ---------------- */
 (function bridal() {
   const wrap = $('#arches');
-  BRIDAL.forEach((b, i) => wrap.appendChild(h(`<figure class="arch" style="background-image:url(${silkURL(b.silk, { w: 300, h: 460 })})">
+  BRIDAL.forEach((b, i) => wrap.appendChild(h(b.img
+    ? `<figure class="arch photo" style="background-image:url(${b.img})"><span>${b.name}</span></figure>`
+    : `<figure class="arch" style="background-image:url(${silkURL(b.silk, { w: 300, h: 460 })})">
     <div class="figure">${figure(b, i + 4)}</div><span>${b.name}</span></figure>`)));
   const arches = [...wrap.children];
   const mid = (arches.length - 1) / 2;

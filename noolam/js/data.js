@@ -1,74 +1,101 @@
-// All content lives here. To use real assets, add an `img` (transparent PNG
-// cut-out) or `video` path to any item; placeholders are drawn only when
-// those fields are missing.
+// All content lives here. Photos are from cult91.com (assets/), with real
+// product names, prices and links. Any item without an `img` falls back to the
+// procedural placeholder art in placeholders.js.
 
+const A = (f) => `assets/${f}`;
+const SHOP = (handle) => `https://cult91.com/products/${handle}`;
+
+// Colour stories: used for accents, dots, story backdrops and the 3D ribbons.
 export const SILKS = {
-  maroon:  { name: 'Murshidabad Maroon', base: '#6d0f22', border: '#c9a24a', motif: '#e2bf6a' },
-  magenta: { name: 'Magenta Shot Silk',  base: '#b3125f', border: '#e7c35a', motif: '#ffd6e8' },
-  teal:    { name: 'Monsoon Teal',       base: '#0f5c63', border: '#d4ad52', motif: '#9ee0d8' },
-  sindoor: { name: 'Sindoor',            base: '#d1301f', border: '#f0c75e', motif: '#ffe1a8' },
-  koorai:  { name: 'Koorai Check',       base: '#a8323e', border: '#2c6b3a', motif: '#f3d58a', check: true },
-  mango:   { name: 'Mango Yellow',       base: '#e2a417', border: '#7a1426', motif: '#7a1426' },
-  peacock: { name: 'Peacock Blue',       base: '#173d8c', border: '#d8b24f', motif: '#6fd0c4' },
-  ivory:   { name: 'Temple Ivory',       base: '#efe3c8', border: '#a3122f', motif: '#c9a24a' },
-  parrot:  { name: 'Parrot Green',       base: '#3d8a2a', border: '#c2185b', motif: '#f2d06b' },
+  maroon:  { name: 'Maroon',       base: '#6d0f22', border: '#c9a24a', motif: '#e2bf6a' },
+  magenta: { name: 'Rani Pink',    base: '#b3125f', border: '#e7c35a', motif: '#ffd6e8' },
+  teal:    { name: 'Teal',         base: '#0f5c63', border: '#d4ad52', motif: '#9ee0d8' },
+  sindoor: { name: 'Sindoor',      base: '#d1301f', border: '#f0c75e', motif: '#ffe1a8' },
+  koorai:  { name: 'Koorai Check', base: '#a8323e', border: '#2c6b3a', motif: '#f3d58a', check: true },
+  mango:   { name: 'Mustard Gold', base: '#e2a417', border: '#7a1426', motif: '#7a1426' },
+  peacock: { name: 'Royal Blue',   base: '#173d8c', border: '#d8b24f', motif: '#6fd0c4' },
+  ivory:   { name: 'Tussar Beige', base: '#d8c3a0', border: '#a3122f', motif: '#c9a24a' },
+  parrot:  { name: 'Olive',        base: '#6b8a1a', border: '#c2185b', motif: '#f2d06b' },
+  noir:    { name: 'Black & Gold', base: '#1f1a17', border: '#c9a24a', motif: '#e2bf6a' },
+  violet:  { name: 'Violet',       base: '#3b2a8c', border: '#c2185b', motif: '#e2bf6a' },
+  grey:    { name: 'Grey',         base: '#5d6066', border: '#b0457a', motif: '#e2bf6a' },
+  orange:  { name: 'Tussar Orange',base: '#c4482a', border: '#e7c35a', motif: '#ffe1a8' },
 };
 
+// Hero: starts zoomed into the fabric at `focus`, pulls back to the full photo.
+export const HERO = { img: A('women-silk-handloom-saree-black-1.jpg'), focus: '52% 66%' };
+
 export const LOOKS = [
-  { id: 'meera',   name: 'Meera',   silk: 'maroon',  pieces: [['Murshidabad Maroon saree', 18400], ['Zari-edge blouse', 3200], ['Temple jhumkas', 2600]] },
-  { id: 'kaveri',  name: 'Kaveri',  silk: 'teal',    pieces: [['Monsoon Teal saree', 21500], ['Elbow-sleeve blouse', 3600], ['Kemp choker', 4800]] },
-  { id: 'tara',    name: 'Tara',    silk: 'magenta', pieces: [['Magenta Shot Silk saree', 16900], ['Contrast gold blouse', 2900]] },
-  { id: 'anjali',  name: 'Anjali',  silk: 'mango',   pieces: [['Mango Yellow half saree', 12800], ['Pattu pavadai', 6400], ['Kasu mala', 5200]] },
-  { id: 'devi',    name: 'Devi',    silk: 'sindoor', pieces: [['Sindoor bridal saree', 46000], ['Full-sleeve blouse', 4900], ['Vaddanam belt', 7800]] },
-  { id: 'nila',    name: 'Nila',    silk: 'peacock', pieces: [['Peacock Blue saree', 23900], ['Boat-neck blouse', 3400]] },
-  { id: 'gowri',   name: 'Gowri',   silk: 'ivory',   pieces: [['Temple Ivory saree', 19800], ['Maroon blouse', 3100], ['Jasmine veni', 300]] },
-  { id: 'lakshmi', name: 'Lakshmi', silk: 'koorai',  pieces: [['Koorai Check saree', 27500], ['Green contrast blouse', 3300]] },
+  { name: 'Black & Gold Silk', silk: 'noir',   img: A('women-silk-handloom-saree-black-1.jpg'),  thumb: A('women-silk-handloom-saree-black-2.jpg'),  url: SHOP('women-silk-handloom-saree-black'),  pieces: [['Women silk handloom saree, black', 7999]] },
+  { name: 'Violet Silk',       silk: 'violet', img: A('women-silk-handloom-saree-voilet-1.jpg'), thumb: A('women-silk-handloom-saree-voilet-2.jpg'), url: SHOP('women-silk-handloom-saree-voilet'), pieces: [['Women silk handloom saree, violet', 4480]] },
+  { name: 'Olive Silk',        silk: 'parrot', img: A('women-silk-handloom-saree-olive-1.jpg'),  thumb: A('women-silk-handloom-saree-olive-2.jpg'),  url: SHOP('women-silk-handloom-saree-olive'),  pieces: [['Women silk handloom saree, olive', 3999]] },
+  { name: 'Beige Tussar',      silk: 'ivory',  img: A('beige-handwoven-tussar-silk-saree-1.jpg'), thumb: A('beige-handwoven-tussar-silk-saree-2.jpg'), url: SHOP('beige-handwoven-tussar-silk-saree'), pieces: [['Beige handwoven tussar silk saree', 5599]] },
+  { name: 'Orange Tussar',     silk: 'orange', img: A('orange-tussar-handloom-saree-1.jpg'),     thumb: A('orange-tussar-handloom-saree-2.jpg'),     url: SHOP('orange-tussar-handloom-saree'),     pieces: [['Orange tussar handloom saree', 7199]] },
+  { name: 'Grey Tussar',       silk: 'grey',   img: A('grey-tussar-handloom-saree-1.jpg'),       thumb: A('grey-tussar-handloom-saree-2.jpg'),       url: SHOP('grey-tussar-handloom-saree'),       pieces: [['Grey tussar handloom saree', 7199]] },
+  { name: 'Teal Tussar',       silk: 'teal',   img: A('teal-tussar-handloom-saree-1.jpg'),       thumb: A('teal-tussar-handloom-saree-2.jpg'),       url: SHOP('teal-tussar-handloom-saree'),       pieces: [['Teal tussar handloom saree', 7199]] },
+  { name: 'Ivory Tussar',      silk: 'ivory',  img: A('beige-tussar-handloom-saree-1.jpg'),      thumb: A('beige-tussar-handloom-saree-2.jpg'),      url: SHOP('beige-tussar-handloom-saree'),      pieces: [['Beige tussar handloom saree', 7199]] },
 ];
 
 export const CARDS = [
-  { silk: 'koorai',  word: 'KOORAI',  price: 27500, bg: '#f6d9c4' },
-  { silk: 'maroon',  word: 'MAROON',  price: 18400, bg: '#f3c6cf' },
-  { silk: 'teal',    word: 'MONSOON', price: 21500, bg: '#bfe6e2' },
-  { silk: 'sindoor', word: 'SINDOOR', price: 24200, bg: '#ffd2b8' },
-  { silk: 'magenta', word: 'SHOT',    price: 16900, bg: '#f7c3dc' },
-  { silk: 'peacock', word: 'PEACOCK', price: 23900, bg: '#c7d3f4' },
+  { silk: 'magenta', word: 'RANI',    title: 'Rani Pink Mirror Work Kurta Set', price: 7999, bg: '#f7c3dc', img: A('rani-pink-mirror-work-kurta-with-zari-pr-1.jpg') },
+  { silk: 'maroon',  word: 'RED',     title: 'Red Silk Suit, Gold Floral',      price: 6599, bg: '#f3c6cf', img: A('red-silk-suit-with-gold-floral-embroider-1.jpg') },
+  { silk: 'teal',    word: 'TEAL',    title: 'Teal Blue Kurta Pant Set',        price: 2799, bg: '#bfe6e2', img: A('teal-blue-embroidered-kurta-pant-set-wit-1.jpg') },
+  { silk: 'sindoor', word: 'ORANGE',  title: 'Orange Shaded Sequin Suit',       price: 5999, bg: '#ffd2b8', img: A('orange-shaded-suit-with-sequin-embellish-1.jpg') },
+  { silk: 'magenta', word: 'SHIBORI', title: 'Pink Shibori Mirror Kurta',       price: 5999, bg: '#f9d0e4', img: A('pink-shibori-tie-dye-kurta-with-heavy-mi-1.jpg') },
+  { silk: 'peacock', word: 'ROYAL',   title: 'Royal Blue Mirror Work Suit',     price: 6599, bg: '#c7d3f4', img: A('royal-blue-traditional-suit-with-mirror--1.jpg') },
 ];
 
 export const RACK_FILTERS = [
-  ['all', 'All pieces'], ['saree', 'Silk Sarees'], ['half', 'Half Sarees'],
-  ['blouse', 'Full-Sleeve Blouses'], ['dupatta', 'Dupattas'],
+  ['all', 'All pieces'], ['saree', 'Sarees'], ['suit', 'Suit Sets'],
+  ['anarkali', 'Anarkali'], ['kaftan', 'Kaftans'], ['festive', 'Co-ords & Lehenga'],
 ];
 
 export const RACK = [
-  { cat: 'saree',   silk: 'maroon',  name: 'Maroon Korvai',      price: 18400 },
-  { cat: 'saree',   silk: 'teal',    name: 'Monsoon Teal',       price: 21500 },
-  { cat: 'half',    silk: 'mango',   name: 'Mango Half Saree',   price: 12800 },
-  { cat: 'blouse',  silk: 'magenta', name: 'Magenta Blouse',     price: 3600 },
-  { cat: 'saree',   silk: 'peacock', name: 'Peacock Butta',      price: 23900 },
-  { cat: 'dupatta', silk: 'ivory',   name: 'Ivory Dupatta',      price: 5400 },
-  { cat: 'half',    silk: 'parrot',  name: 'Parrot Half Saree',  price: 11900 },
-  { cat: 'blouse',  silk: 'sindoor', name: 'Sindoor Blouse',     price: 3900 },
-  { cat: 'saree',   silk: 'koorai',  name: 'Koorai Check',       price: 27500 },
-  { cat: 'dupatta', silk: 'magenta', name: 'Rani Dupatta',       price: 4800 },
-  { cat: 'blouse',  silk: 'teal',    name: 'Teal Brocade Blouse',price: 4200 },
-  { cat: 'half',    silk: 'sindoor', name: 'Sindoor Half Saree', price: 13600 },
+  { cat: 'saree',    silk: 'violet',  name: 'Violet Silk Handloom Saree', price: 4480,  img: A('women-silk-handloom-saree-voilet-1.jpg') },
+  { cat: 'suit',     silk: 'peacock', name: 'Navy Shibori Kurta Set',     price: 6999,  img: A('navy-blue-embroidered-kurta-set-with-shi-1.jpg') },
+  { cat: 'anarkali', silk: 'ivory',   name: 'Ivory Sequin Anarkali',      price: 5599,  img: A('ivory-sequin-embroidered-anarkali-suit-s-1.jpg') },
+  { cat: 'kaftan',   silk: 'ivory',   name: 'Gold Striped Rabari Kaftan', price: 6999,  img: A('beige-gold-striped-kaftan-with-rabari-mi-1.jpg') },
+  { cat: 'saree',    silk: 'orange',  name: 'Orange Tussar Saree',        price: 7199,  img: A('orange-tussar-handloom-saree-1.jpg') },
+  { cat: 'festive',  silk: 'mango',   name: 'Shimmer Gold Co-ord Set',    price: 7999,  img: A('shimmer-gold-co-ord-set-with-zari-embroi-1.jpg') },
+  { cat: 'suit',     silk: 'maroon',  name: 'Red Silk Floral Suit',       price: 6599,  img: A('red-silk-suit-with-gold-floral-embroider-1.jpg') },
+  { cat: 'anarkali', silk: 'peacock', name: 'Blue Layered Anarkali',      price: 5599,  img: A('blue-layered-anarkali-set-with-gota-patt-1.jpg') },
+  { cat: 'kaftan',   silk: 'peacock', name: 'Royal Blue Zardozi Kaftan',  price: 5599,  img: A('royal-blue-satin-kaftan-with-gold-zardoz-1.jpg') },
+  { cat: 'saree',    silk: 'grey',    name: 'Grey Tussar Saree',          price: 7199,  img: A('grey-tussar-handloom-saree-1.jpg') },
+  { cat: 'festive',  silk: 'orange',  name: 'Orange Mirror Lehenga Set',  price: 11999, img: A('orange-mirror-embellished-lehenga-set-1.jpg') },
+  { cat: 'suit',     silk: 'teal',    name: 'Teal Blue Kurta Pant Set',   price: 2799,  img: A('teal-blue-embroidered-kurta-pant-set-wit-1.jpg') },
 ];
 
+// Feel the drape: eight side tiles and a crossfading centre "clip".
+// Swap the centre for a real video by setting DRAPE.video.
+export const DRAPE = {
+  tiles: [
+    A('teal-tussar-handloom-saree-2.jpg'), A('orange-embroidered-blouse-with-draped-sk-2.jpg'),
+    A('beige-tussar-handloom-saree-2.jpg'), A('lilac-v-neck-kurta-set-with-pearl-lace-d-1.jpg'),
+    A('women-silk-handloom-saree-voilet-2.jpg'), A('women-silk-handloom-saree-olive-2.jpg'),
+    A('grey-tussar-handloom-saree-2.jpg'), A('beige-handwoven-tussar-silk-saree-1.jpg'),
+  ],
+  slides: [
+    A('orange-tussar-handloom-saree-1.jpg'), A('orange-tussar-handloom-saree-2.jpg'),
+    A('beige-handwoven-tussar-silk-saree-2.jpg'), A('women-silk-handloom-saree-black-2.jpg'),
+  ],
+  video: null,
+};
+
 export const REELS = [
-  { title: 'The pallu reveal',     silk: 'magenta', tint: '#7a0d3f' },
-  { title: 'Loom to light',        silk: 'maroon',  tint: '#4a0a17' },
-  { title: 'Monsoon drape',        silk: 'teal',    tint: '#0b3c41' },
-  { title: 'Bride, 6am',           silk: 'sindoor', tint: '#7d1a10' },
-  { title: 'Checks, two ways',     silk: 'koorai',  tint: '#5a1a20' },
-  { title: 'Peacock in the temple',silk: 'peacock', tint: '#0e2557' },
+  { title: 'Orange tussar, in the light', silk: 'orange',  tint: '#6e2412', img: A('orange-tussar-handloom-saree-1.jpg') },
+  { title: 'Grey and wine pallu',         silk: 'grey',    tint: '#2b2d33', img: A('grey-tussar-handloom-saree-1.jpg') },
+  { title: 'Navy shibori, festive edit',  silk: 'peacock', tint: '#0e2557', img: A('navy-blue-embroidered-kurta-set-with-shi-1.jpg') },
+  { title: 'Peach satin and mirror work', silk: 'orange',  tint: '#7a3a22', img: A('peach-satin-kurta-with-mirror-work-embro-1.jpg') },
+  { title: 'White lotus print',           silk: 'ivory',   tint: '#3c4a3a', img: A('white-lotus-print-kurta-with-printed-pal-1.jpg') },
+  { title: 'The mirror lehenga',          silk: 'sindoor', tint: '#6b1d0e', img: A('orange-mirror-embellished-lehenga-set-1.jpg') },
 ];
 
 export const BRIDAL = [
-  { name: 'Muhurtham Red',  silk: 'sindoor' },
-  { name: 'Kalyana Maroon', silk: 'maroon' },
-  { name: 'Mangalam Gold',  silk: 'mango' },
-  { name: 'Ivory Temple',   silk: 'ivory' },
-  { name: 'Rani Pink',      silk: 'magenta' },
+  { name: 'Mirror Lehenga',   silk: 'sindoor', img: A('orange-mirror-embellished-lehenga-set-1.jpg') },
+  { name: 'Draped Saree Set', silk: 'orange',  img: A('orange-embroidered-blouse-with-draped-sk-1.jpg') },
+  { name: 'Black & Gold',     silk: 'noir',    img: A('women-silk-handloom-saree-black-2.jpg') },
+  { name: 'Red Silk Floral',  silk: 'maroon',  img: A('red-silk-suit-with-gold-floral-embroider-1.jpg') },
+  { name: 'Ivory Anarkali',   silk: 'ivory',   img: A('ivory-sequin-embroidered-anarkali-suit-s-1.jpg') },
 ];
 
 export const WEAVE = ['maroon', 'magenta', 'mango'];

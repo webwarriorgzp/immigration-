@@ -203,3 +203,55 @@ section { position: relative; padding: clamp(80px, 12vw, 140px) 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* ================= Photo mode (real product photography) ================= */
+/* Hero: the photo pulls back from a fabric close-up into an arch */
+.hero.has-photo .hero-silk, .hero.has-photo .showroom-shelves { display: none; }
+.hero-photo { position: absolute; z-index: 1; top: 12vh; right: 6vw; bottom: 6vh; width: min(38vw, 52vh); margin: 0; overflow: hidden; border-radius: 999px 999px 24px 24px; box-shadow: 0 40px 90px rgba(60, 5, 20, .28); --shade: 0; }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+.hero-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(28, 6, 12, .85) 0%, rgba(28, 6, 12, .35) 45%, transparent 70%); opacity: var(--shade); pointer-events: none; }
+.hero.has-photo .hero-copy { justify-self: start; text-align: left; margin: 0 0 0 6vw; max-width: min(48vw, 640px); }
+.hero.has-photo .hero-title { font-size: clamp(3rem, 7.4vw, 7.4rem); }
+.hero.has-photo .hero-sub { margin-left: 0; }
+@media (max-width: 800px) {
+  .hero-photo { inset: 0; width: auto; border-radius: 0; box-shadow: none; }
+  .hero.has-photo .hero-stage { place-items: end start; }
+  .hero.has-photo .hero-copy { margin: 0 0 12vh; padding: 0 max(16px, env(safe-area-inset-left, 0px)); max-width: none; z-index: 2; }
+  .hero.has-photo .hero-title, .hero.has-photo .hero-sub { color: #fff; }
+  .hero.has-photo .accent { background: linear-gradient(100deg, #ffd98a, #ffb3c8); -webkit-background-clip: text; background-clip: text; }
+}
+
+/* Try the Look: accordion of photo slices */
+.lineup.photo { align-items: stretch; gap: 8px; height: min(64vh, 560px); }
+.lineup.photo .model { flex: 1 1 0; height: auto; margin: 0; transition: flex-grow .7s cubic-bezier(.2, .8, .2, 1), filter .5s, opacity .5s; }
+.lineup.photo .model.active { flex-grow: 4.2; }
+.lineup.photo .model img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; border-radius: 16px; box-shadow: 0 18px 40px rgba(60, 5, 20, .16); }
+.lineup.photo .model .model-name { bottom: 14px; left: 14px; color: #fff; text-shadow: 0 2px 10px rgba(0, 0, 0, .6); }
+.lineup.photo.has-focus .model.active { transform: none; }
+.look-thumb { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: 50% 25%; border-radius: 14px; margin-bottom: 16px; }
+@media (max-width: 860px) {
+  .lineup.photo { height: auto; padding-bottom: 12px; gap: 12px; }
+  .lineup.photo .model, .lineup.photo .model.active { flex: 0 0 46vw; aspect-ratio: 2 / 3; }
+}
+
+/* Pick a Silk: photo in an arch window */
+.silk-card .figure.photo { left: 16px; right: 16px; top: 24%; bottom: 0; transform: none; height: auto; border-radius: 999px 999px 0 0; overflow: hidden; }
+.silk-card .figure.photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+.silk-card .meta small { max-width: 22ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* The Rack: photos hung from a hanger */
+.garment.photo { width: 180px; }
+.garment.photo .hanger { width: 70%; margin: 0 auto -6px; position: relative; z-index: 1; }
+.garment.photo img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 20%; border-radius: 10px; box-shadow: 0 14px 30px rgba(60, 5, 20, .15); }
+@media (max-width: 600px) { .garment.photo { width: 44%; } }
+
+/* Feel the drape: crossfading centre */
+.drape-slides { position: absolute; inset: 0; }
+.drape-slides img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.08); transition: opacity 1.2s ease, transform 6s ease-out; }
+.drape-slides img.on { opacity: 1; transform: scale(1); }
+.tile { background-position: 50% 20%; }
+
+/* Bridal arches with photos */
+.arch.photo { background-position: 50% 15%; }
+.arch.photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(28, 6, 12, .6), transparent 40%); }
+.arch.photo span { z-index: 1; }

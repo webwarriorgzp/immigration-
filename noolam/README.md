@@ -16,7 +16,10 @@ Run it with any static server from this folder, e.g. `python3 -m http.server`, t
 | 7 | Bridal | Arch cards fan out on scroll |
 | 8 | Three silks, one weave | Three.js ribbons (CPU-deformed planes, sheen material) blend from free flow into a braid as you scroll |
 
-## Swapping in real assets
+## Photography
+The product photos in `assets/` come from cult91.com. They're downsized to 900px JPEGs, and each look, card, rack item and reel uses its real product name and price. "Shop the look" links to the product page on cult91.com. Try the Look uses an expanding accordion because the photos have solid backgrounds, not transparent cut-outs.
+
+## Swapping in assets
 All content is in `js/data.js`. Placeholders (procedural silk textures and SVG models and garments, in `js/placeholders.js`) are drawn only when an item has no asset:
 
 - Looks, cards and bridal items: add `img: 'assets/meera.png'` (a transparent PNG cut-out).
