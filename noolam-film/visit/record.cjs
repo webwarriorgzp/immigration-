@@ -124,8 +124,10 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     await scrollTo(mid(l.silks, 0.4), 3.4);
     const card = await p.evaluate(() => { const cs = [...document.querySelectorAll('.scard')]; let best = 0, bd = 1e9; cs.forEach((c, i) => { const r = c.getBoundingClientRect(); const d = Math.abs(r.left + r.width / 2 - innerWidth * 0.42); if (d < bd) { bd = d; best = i; } }); return best; });
     await moveTo('.scard', card, 0.8, 0.5, 0.3); await move(s.mx + 50, s.my + 36, 1.0);
-    await click(1.5);
-    await click(1.1);
+    // Headless 3D hit-testing misses the card faces, so the click also turns the card it lands on.
+    const flip = () => p.evaluate((i) => document.querySelectorAll('.scard')[i].classList.toggle('flipped'), card);
+    await click(0); await flip(); await hold(1.6);
+    await click(0); await flip(); await hold(1.1);
     await scrollTo(l.silks[1], 3.2);
     // 5. The Rack.
     l = await L();
