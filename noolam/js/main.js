@@ -30,8 +30,10 @@ function addToBag(label, qty = 1, quiet = false) {
 const bagMsg = () => toast(bag.n ? `Your bag has ${bag.n} piece${bag.n > 1 ? 's' : ''}` : 'Your bag is empty');
 
 /* ---------------- Smooth scroll ---------------- */
+// ?rec turns off Lenis so a frame-by-frame screen capture can set the scroll position exactly.
+const REC = new URLSearchParams(location.search).has('rec');
 let lenis = null;
-if (!reduced && Lenis) {
+if (!reduced && Lenis && !REC) {
   lenis = new Lenis({ lerp: 0.1 });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
