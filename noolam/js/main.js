@@ -339,7 +339,11 @@ gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '.hero', s
   }
   const screen = $('#drape-screen'), bar = $('#screen-bar');
   if (DRAPE.video) {
-    screen.insertAdjacentHTML('afterbegin', `<video src="${DRAPE.video}" autoplay muted loop playsinline></video>`);
+    screen.insertAdjacentHTML('afterbegin', `<video src="${DRAPE.video}"${DRAPE.poster ? ` poster="${DRAPE.poster}"` : ''} muted loop playsinline preload="metadata" aria-label="NOOLAM film: one thread, from silk to the weave"></video>`);
+    const vid = $('video', screen);
+    // Play only while the screen is on view; the progress bar follows the film.
+    ScrollTrigger.create({ trigger: screen, start: 'top bottom', end: 'bottom top', onToggle: (s) => { if (s.isActive) vid.play().catch(() => {}); else vid.pause(); } });
+    vid.addEventListener('timeupdate', () => { if (vid.duration) bar.style.width = `${(vid.currentTime / vid.duration) * 100}%`; });
   } else {
     screen.insertAdjacentHTML('afterbegin', DRAPE.slides.map((s, i) => `<img src="${s.src}" alt="" style="object-position:${s.pos}" class="${i ? '' : 'on'}" loading="lazy">`).join(''));
     const slides = $$('img', screen); let cur = 0, tw = null;

@@ -120,7 +120,9 @@ export const DRAPE = {
     { src: A('drape-chikankari.jpg'), pos: '45% 40%' },
     { src: A('hero-heritage.jpg'), pos: '40% 50%' },
   ],
-  video: null, // set to an .mp4 path to replace the slideshow
+  // The NOOLAM "One Thread" film (made in ../noolam-film). Set to null to fall back to the slideshow.
+  video: null, // A('noolam-film.mp4') once the film render is added
+  poster: null,
 };
 
 // Silk, in motion.

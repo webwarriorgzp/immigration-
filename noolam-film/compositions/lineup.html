@@ -1,0 +1,107 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #ffffff; }
+    #s2-world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 924px 402px; }
+    #s2-show { position: absolute; left: -113px; top: 0; width: 2146px; height: 1080px; object-fit: cover; display: block; }
+    #s2-panel { position: absolute; left: 774px; top: 317.625px; width: 300px; height: 168.75px; overflow: hidden; background: #ffffff; }
+    #s2-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(0.15625); transform-origin: 0 0; background: #ffffff; }
+    #s2-cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 925px 736px; }
+    .s2-fig { position: absolute; top: 290px; height: 720px; }
+    .s2-fig img { position: relative; display: block; height: 720px; width: 100%; z-index: 1; }
+    .s2-fig i { position: absolute; left: 8%; right: 8%; bottom: -16px; height: 38px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(29, 27, 32, 0.2), rgba(29, 27, 32, 0) 70%); }
+    #s2-f-grey { left: -330px; width: 579px; z-index: 2; }
+    #s2-f-olive { left: 210px; width: 231px; z-index: 4; }
+    #s2-f-black { left: 321px; width: 372px; z-index: 6; }
+    #s2-f-draped { left: 573px; width: 289px; z-index: 8; }
+    #s2-f-orange { left: 742px; width: 436px; z-index: 10; transform-origin: 50% 100%; }
+    #s2-f-violet { left: 1058px; width: 229px; z-index: 8; }
+    #s2-f-lehenga { left: 1167px; width: 490px; z-index: 6; }
+    #s2-f-beige { left: 1537px; width: 316px; z-index: 4; }
+    #s2-head { position: absolute; left: 120px; top: 86px; z-index: 20; }
+    #s2-eyebrow { font-family: Inter, sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.24em; color: #77707a; text-transform: uppercase; }
+    #s2-title { font-family: "Inter Tight", Inter, sans-serif; font-weight: 600; font-size: 104px; line-height: 1.04; letter-spacing: -0.035em; color: #1d1b20; margin-top: 12px; }
+    #s2-title span, #s2-title2 span { display: inline-block; margin-right: 0.22em; }
+    .s2-accent { color: #c8102e; }
+    #s2-tagclip { position: absolute; inset: 0; z-index: 22; }
+    #s2-tag { position: absolute; left: 1150px; top: 400px; z-index: 22; background: #1d1b20; color: #fff; font-family: Inter, sans-serif; font-weight: 700; font-size: 30px; padding: 16px 26px; border-radius: 999px; white-space: nowrap; }
+    #s2-tag b { color: #f3c34a; font-weight: 700; }
+    #s2-frame { position: absolute; inset: 0; box-shadow: inset 0 0 0 2px rgba(185, 138, 60, 0.85); z-index: 30; }
+    #s2-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(18, 6, 8, 0.72) 0%, rgba(18, 6, 8, 0.28) 38%, rgba(18, 6, 8, 0) 60%); pointer-events: none; }
+    #s2-low { position: absolute; left: 120px; bottom: 116px; color: #fff; }
+    #s2-eyebrow2 { font-family: Inter, sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); }
+    #s2-title2 { font-family: "Inter Tight", Inter, sans-serif; font-weight: 600; font-size: 112px; line-height: 1.02; letter-spacing: -0.04em; margin-top: 10px; }
+    #s2-title2 .s2-gold { color: #f3c34a; }
+    #s2-wipe { position: absolute; inset: 0; background: #ffffff; }
+  </style>
+  <div id="root" data-composition-id="lineup" data-width="1920" data-height="1080">
+    <div id="s2-world" data-layout-allow-overflow>
+      <img id="s2-show" src="assets/img/hero-showroom.jpg" alt="The NOOLAM showroom">
+      <div id="s2-panel">
+        <div id="s2-stage">
+          <div id="s2-cam">
+            <div class="s2-fig" id="s2-f-grey"><img src="assets/img/look-grey.webp" alt="Grey tussar saree"><i></i></div>
+            <div class="s2-fig" id="s2-f-olive"><img src="assets/img/look-olive.webp" alt="Olive silk saree"><i></i></div>
+            <div class="s2-fig" id="s2-f-black"><img src="assets/img/look-black.webp" alt="Black and gold silk saree"><i></i></div>
+            <div class="s2-fig" id="s2-f-draped"><img src="assets/img/look-draped.webp" alt="Rust draped saree set"><i></i></div>
+            <div class="s2-fig" id="s2-f-orange"><img src="assets/img/look-orange.webp" alt="Orange tussar saree"><i></i></div>
+            <div class="s2-fig" id="s2-f-violet"><img src="assets/img/look-violet.webp" alt="Violet silk saree"><i></i></div>
+            <div class="s2-fig" id="s2-f-lehenga"><img src="assets/img/look-lehenga.webp" alt="Orange mirror lehenga"><i></i></div>
+            <div class="s2-fig" id="s2-f-beige"><img src="assets/img/look-beige.webp" alt="Beige tussar saree"><i></i></div>
+          </div>
+          <div id="s2-head" class="clip" data-start="1.9" data-duration="3.55">
+            <p id="s2-eyebrow">Styled head to toe</p>
+            <h2 id="s2-title"><span>Try</span><span>the</span><span class="s2-accent">Look.</span></h2>
+          </div>
+          <div id="s2-tagclip" class="clip" data-start="3.2" data-duration="1.6"><p id="s2-tag">Sindoor Tussar · <b>₹7,199</b></p></div>
+        </div>
+        <div id="s2-frame"></div>
+      </div>
+    </div>
+    <div id="s2-shade"></div>
+    <div id="s2-low" class="clip" data-start="7.5" data-duration="2.55">
+      <p id="s2-eyebrow2">The NOOLAM showroom</p>
+      <h2 id="s2-title2"><span>Woven</span><span>for</span><span>the</span><span class="s2-gold">Divine.</span></h2>
+    </div>
+    <div id="s2-wipe" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const noz = { force3D: false };
+      // Start: the showroom is scaled so its framed panel exactly fills the frame.
+      tl.fromTo("#s2-world", { x: 36, y: 138, scale: 6.44 }, { x: 36, y: 138, scale: 6.44, duration: 0.01, ...noz }, 0);
+      tl.fromTo("#s2-frame", { opacity: 0 }, { opacity: 0, duration: 0.01 }, 0);
+      tl.fromTo("#s2-shade", { opacity: 0 }, { opacity: 0, duration: 0.01 }, 0);
+      tl.fromTo("#s2-wipe", { xPercent: 100 }, { xPercent: 100, duration: 0.01 }, 0);
+      // 1. Pull back from the pallu to the model.
+      tl.fromTo("#s2-cam", { scale: 7 }, { scale: 1, duration: 2.0, ease: "power2.inOut", ...noz }, 0);
+      // 2. Seven more looks step in from her sides, nearest first.
+      const enter = [["#s2-f-draped", -1, 0], ["#s2-f-violet", 1, 0], ["#s2-f-black", -1, 1], ["#s2-f-lehenga", 1, 1], ["#s2-f-olive", -1, 2], ["#s2-f-beige", 1, 2], ["#s2-f-grey", -1, 3]];
+      enter.forEach(([sel, dir, k]) => tl.fromTo(sel, { x: dir * 240, opacity: 0 }, { x: 0, opacity: 1, duration: 0.9, ease: "expo.out" }, 1.4 + k * 0.08));
+      // 3. Title.
+      tl.fromTo("#s2-eyebrow", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 1.95);
+      tl.fromTo("#s2-title span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, stagger: 0.08, ease: "power4.out" }, 2.15);
+      // 4. One look singled out, with its real name and price.
+      const others = ["#s2-f-grey", "#s2-f-olive", "#s2-f-black", "#s2-f-draped", "#s2-f-violet", "#s2-f-lehenga", "#s2-f-beige"];
+      tl.to(others, { opacity: 0.3, duration: 0.35, ease: "power2.out" }, 3.2);
+      tl.fromTo("#s2-f-orange", { scale: 1 }, { scale: 1.05, duration: 0.6, ease: "power3.out", ...noz }, 3.2);
+      tl.fromTo("#s2-tag", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 3.3);
+      tl.to("#s2-tag", { opacity: 0, duration: 0.2, ease: "power2.in" }, 4.55);
+      tl.to(others, { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 4.6);
+      tl.to("#s2-f-orange", { scale: 1, duration: 0.4, ease: "power2.inOut", ...noz }, 4.6);
+      tl.to(["#s2-eyebrow", "#s2-title span"], { opacity: 0, filter: "blur(8px)", duration: 0.2, stagger: 0.03, ease: "power2.in" }, 5.15);
+      // 5. The lineup was the framed panel on the showroom's back wall: pull back into the room.
+      tl.to("#s2-frame", { opacity: 1, duration: 0.6, ease: "power2.out" }, 5.4);
+      tl.to("#s2-world", { x: 0, y: 0, scale: 1, duration: 2.3, ease: "power2.inOut", ...noz }, 5.2);
+      tl.to("#s2-world", { scale: 1.05, duration: 2.6, ease: "power1.inOut", ...noz }, 7.5);
+      tl.to("#s2-shade", { opacity: 1, duration: 0.6, ease: "power2.out" }, 7.2);
+      tl.fromTo("#s2-eyebrow2", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 7.55);
+      tl.fromTo("#s2-title2 span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, stagger: 0.08, ease: "power4.out" }, 7.7);
+      tl.to(["#s2-eyebrow2", "#s2-title2 span"], { opacity: 0, filter: "blur(8px)", duration: 0.2, stagger: 0.03, ease: "power2.in" }, 9.75);
+      // 6. Whip left into white.
+      tl.to("#s2-world", { x: -900, duration: 0.38, ease: "power3.in", ...noz }, 10.1);
+      tl.to("#s2-wipe", { xPercent: 0, duration: 0.36, ease: "power3.in" }, 10.12);
+      window.__timelines["lineup"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,47 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(ellipse 80% 75% at 50% 52%, #ffffff 0%, #fbf8f9 62%, #f4eef0 100%); }
+    #s4-line { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+    #s4-crest { position: absolute; left: 875px; top: 290px; width: 170px; height: 170px; overflow: visible; }
+    #s4-word { position: absolute; left: 0; right: 0; top: 488px; text-align: center; font-family: "Cormorant Garamond", "EB Garamond", serif; font-weight: 600; font-size: 92px; letter-spacing: 0.28em; padding-left: 0.28em; color: #5c0b23; line-height: 1.1; }
+    #s4-word span { display: inline-block; }
+    #s4-tag { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font-family: "Inter Tight", Inter, sans-serif; font-weight: 600; font-size: 50px; letter-spacing: -0.03em; color: #1d1b20; }
+    #s4-tag span { display: inline-block; margin: 0 0.12em; }
+    .s4-accent { color: #c8102e; }
+    #s4-ctaclip { position: absolute; inset: 0; }
+    #s4-cta { position: absolute; left: 50%; top: 742px; width: 380px; margin-left: -190px; height: 72px; border-radius: 999px; background: linear-gradient(180deg, #e6283f, #c8102e); color: #fff; font-family: Inter, sans-serif; font-weight: 700; font-size: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 9px 0 34px; box-shadow: 0 16px 34px rgba(200, 16, 46, 0.28); }
+    #s4-cta b { width: 54px; height: 54px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+    #s4-cta svg { width: 24px; height: 24px; }
+  </style>
+  <div id="root" data-composition-id="endcard" data-width="1920" data-height="1080">
+    <svg id="s4-line" viewBox="0 0 1920 1080" aria-hidden="true">
+      <defs><linearGradient id="s4-gold" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1920" y2="0"><stop offset="0" stop-color="#b98a3c" /><stop offset=".45" stop-color="#f1d58e" /><stop offset=".7" stop-color="#d2a956" /><stop offset="1" stop-color="#b98a3c" /></linearGradient></defs>
+      <g id="s4-line-g"><line x1="-20" y1="540" x2="1940" y2="540" stroke="url(#s4-gold)" stroke-width="5" stroke-linecap="round" /></g>
+    </svg>
+    <svg id="s4-crest" viewBox="0 0 64 64" aria-label="NOOLAM crest">
+      <defs><linearGradient id="s4-crest-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9b25c" /><stop offset=".5" stop-color="#b98a3c" /><stop offset="1" stop-color="#8c6326" /></linearGradient></defs>
+      <path id="s4-crest-a" d="M32 4v6M27 14h10l-1-4h-8zM24 22h16l-2-8H26zM20 32h24l-3-10H23zM16 44h32l-4-12H20zM12 58h40l-4-14H16z" fill="none" stroke="url(#s4-crest-gold)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110" />
+      <path id="s4-crest-b" d="M28 58v-8a4 4 0 0 1 8 0v8" fill="none" stroke="url(#s4-crest-gold)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110" />
+    </svg>
+    <h1 id="s4-word" class="clip" data-start="2.1" data-duration="3.9"><span>N</span><span>O</span><span>O</span><span>L</span><span>A</span><span>M</span></h1>
+    <p id="s4-tag" class="clip" data-start="3.3" data-duration="2.7"><span>Woven</span><span>with</span><span>heritage.</span><span>Draped</span><span>for</span><span class="s4-accent">today.</span></p>
+    <div id="s4-ctaclip" class="clip" data-start="3.75" data-duration="2.25"><div id="s4-cta"><span id="s4-cta-label">Visit the Store</span><b><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="#c8102e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg></b></div></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      // The thread from the weave draws in to the crest's base, then traces the crest.
+      tl.fromTo("#s4-line-g", { scaleX: 1, y: 0, transformOrigin: "960px 540px" }, { scaleX: 0.02, y: -96, duration: 1.0, ease: "power3.inOut" }, 0);
+      tl.to("#s4-line", { opacity: 0, duration: 0.2, ease: "power2.in" }, 0.95);
+      tl.fromTo("#s4-crest-a", { attr: { "stroke-dashoffset": 110 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.5, ease: "power2.inOut" }, 0.7);
+      tl.fromTo("#s4-crest-b", { attr: { "stroke-dashoffset": 110 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.6, ease: "power2.inOut" }, 1.6);
+      // Wordmark, letter by letter.
+      tl.fromTo("#s4-word span", { opacity: 0.3, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.3, stagger: 0.1, ease: "power2.out" }, 2.15);
+      tl.fromTo("#s4-word", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 2.1);
+      // Line and call to action, then hold.
+      tl.fromTo("#s4-tag span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, stagger: 0.08, ease: "power4.out" }, 3.4);
+      tl.fromTo("#s4-cta", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.7, ease: "expo.out" }, 3.8);
+      window.__timelines["endcard"] = tl;
+    })();
+  </script>
+</template>

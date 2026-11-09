@@ -1,0 +1,114 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(ellipse 80% 75% at 50% 52%, #ffffff 0%, #fbf8f9 62%, #f4eef0 100%); }
+    #s3-canvas { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: block; }
+    #s3-line { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+    #s3-title { position: absolute; left: 0; right: 0; top: 132px; text-align: center; font-family: "Inter Tight", Inter, sans-serif; font-weight: 600; font-size: 108px; letter-spacing: -0.035em; color: #1d1b20; }
+    #s3-title span { display: inline-block; margin: 0 0.11em; }
+    .s3-accent { color: #c8102e; }
+    #s3-names { position: absolute; left: 0; right: 0; top: 842px; text-align: center; font-family: Inter, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: 0.02em; color: #77707a; }
+    #s3-names span { display: inline-block; margin: 0 0.4em; }
+    #s3-names i { font-style: normal; color: #9a7428; }
+  </style>
+  <div id="root" data-composition-id="weave" data-width="1920" data-height="1080">
+    <canvas id="s3-canvas" width="1920" height="1080" data-layout-ignore></canvas>
+    <svg id="s3-line" viewBox="0 0 1920 1080" aria-hidden="true">
+      <defs><linearGradient id="s3-gold" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1920" y2="0"><stop offset="0" stop-color="#b98a3c" /><stop offset=".45" stop-color="#f1d58e" /><stop offset=".7" stop-color="#d2a956" /><stop offset="1" stop-color="#b98a3c" /></linearGradient></defs>
+      <line id="s3-gold-line" x1="-20" y1="540" x2="1940" y2="540" stroke="url(#s3-gold)" stroke-width="5" stroke-linecap="round" />
+    </svg>
+    <h2 id="s3-title" class="clip" data-start="0.75" data-duration="4.7"><span>Three</span><span>silks,</span><span class="s3-accent">one</span><span class="s3-accent">weave.</span></h2>
+    <p id="s3-names" class="clip" data-start="2.9" data-duration="2.45"><span>Noir Zari</span><i>◆</i><span>Sindoor Tussar</span><i>◆</i><span>Midnight Violet</span></p>
+  </div>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+
+    const SRC = ["assets/img/fabric-black-gold.jpg", "assets/img/fabric-orange.jpg", "assets/img/fabric-violet.jpg"];
+    const load = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+    const inOut = (x) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+    const out3 = (x) => 1 - Math.pow(1 - x, 3);
+    const smooth = (x) => x * x * (3 - 2 * x);
+
+    const images = await Promise.all(SRC.map(load));
+    const canvas = document.getElementById("s3-canvas");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(1);
+    renderer.setSize(1920, 1080, false);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(32, 1920 / 1080, 0.1, 100);
+    camera.position.set(0, 0, 17);
+    camera.lookAt(0, 0, 0);
+    scene.add(new THREE.HemisphereLight(0xfff6ee, 0x6a3040, 1.5));
+    const key = new THREE.DirectionalLight(0xffffff, 2.1); key.position.set(3, 6, 9); scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffd3df, 1.2); rim.position.set(-6, -3, -4); scene.add(rim);
+
+    const SEG_U = 220, SEG_V = 10, L = 26, W = 1.15;
+    const strands = images.map((img, i) => {
+      const tex = new THREE.Texture(img);
+      tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = THREE.MirroredRepeatWrapping; tex.repeat.set(4, 1); tex.anisotropy = 4; tex.needsUpdate = true;
+      const geo = new THREE.PlaneGeometry(L, W, SEG_U, SEG_V);
+      const mat = new THREE.MeshPhysicalMaterial({ map: tex, side: THREE.DoubleSide, roughness: 0.48, metalness: 0.04, sheen: 1, sheenRoughness: 0.4, sheenColor: new THREE.Color(0xfff0dc) });
+      const mesh = new THREE.Mesh(geo, mat); mesh.frustumCulled = false; scene.add(mesh);
+      // The thread: a thin gold strip on the same path, readable at any frame.
+      const lgeo = new THREE.PlaneGeometry(L, 1, SEG_U, 1);
+      const line = new THREE.Mesh(lgeo, new THREE.MeshBasicMaterial({ color: 0xc9a24a, transparent: true, opacity: 0.95, side: THREE.DoubleSide }));
+      line.frustumCulled = false; // its bounds move every frame
+      scene.add(line);
+      return { geo, mesh, line, phase: (i / 3) * Math.PI * 2 };
+    });
+
+    // Everything below is a pure function of scene time T (seconds).
+    function render(T) {
+      const enter = out3(clamp01(T / 0.45));
+      const braid = inOut(clamp01((T - 2.6) / 1.8));
+      const collapse = inOut(clamp01((T - 4.6) / 1.2));
+      strands.forEach((st, i) => {
+        const fill = inOut(clamp01((T - (0.5 + 0.5 * i)) / 1.3));
+        const amp = 1 - collapse;
+        const centre = (u) => {
+          const x = (u - 0.5) * L + (1 - enter) * 28;
+          const fy = Math.sin(u * 5.2 + T * 0.55 + st.phase) * 0.85 + Math.sin(u * 11 - T * 0.4 + i) * 0.12;
+          const fz = Math.cos(u * 4 + T * 0.45 + st.phase) * 0.55;
+          const a = x * 1.05 + st.phase + T * 0.5;
+          const R = 0.62 * amp;
+          const y = (fy + (Math.cos(a) * R - fy) * braid) * amp;
+          const z = (fz + (Math.sin(a) * R - fz) * braid) * amp;
+          return { x, y, z, a };
+        };
+        const lp = st.line.geometry.attributes.position;
+        for (let iu = 0; iu <= SEG_U; iu++) { const c = centre(iu / SEG_U); lp.setXYZ(iu, c.x, c.y + 0.022, c.z); lp.setXYZ(SEG_U + 1 + iu, c.x, c.y - 0.022, c.z); }
+        lp.needsUpdate = true;
+        st.line.material.opacity = 0.95 * (1 - Math.min(1, fill * 1.4));
+        st.mesh.visible = fill > 0.001;
+        if (!st.mesh.visible) return;
+        const pos = st.geo.attributes.position;
+        for (let iu = 0; iu <= SEG_U; iu++) {
+          const u = iu / SEG_U; const c = centre(u);
+          const reveal = clamp01((fill * 1.18 - u) / 0.18);
+          const w = W * smooth(reveal) * (1 - 0.25 * braid) * (1 - 0.97 * collapse);
+          const twist = Math.sin(u * 3 + T * 0.7 + st.phase) * 1.1 * (1 - braid) + (c.a + Math.PI / 2) * braid;
+          const cy = Math.cos(twist), cz = Math.sin(twist);
+          for (let iv = 0; iv <= SEG_V; iv++) { const v = iv / SEG_V - 0.5; pos.setXYZ(iv * (SEG_U + 1) + iu, c.x, c.y + cy * v * w, c.z + cz * v * w); }
+        }
+        pos.needsUpdate = true;
+        st.geo.computeVertexNormals();
+      });
+      scene.rotation.z = -0.06 * (1 - braid);
+      renderer.render(scene, camera);
+    }
+
+    const tl = gsap.timeline({ paused: true });
+    const clock = { T: 0 };
+    tl.to(clock, { T: 6, duration: 6, ease: "none", onUpdate: () => render(clock.T) }, 0);
+    tl.fromTo("#s3-gold-line", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.inOut" }, 5.0);
+    tl.fromTo("#s3-title span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, stagger: 0.08, ease: "power4.out" }, 0.8);
+    tl.to("#s3-title span", { opacity: 0, filter: "blur(8px)", duration: 0.2, stagger: 0.03, ease: "power2.in" }, 5.15);
+    tl.fromTo("#s3-names span, #s3-names i", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, stagger: 0.07, ease: "power4.out" }, 2.95);
+    tl.to("#s3-names", { opacity: 0, duration: 0.2, ease: "power2.in" }, 5.1);
+    render(0);
+    window.__timelines["weave"] = tl;
+  </script>
+</template>
