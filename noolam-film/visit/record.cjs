@@ -4,19 +4,26 @@
 // Usage: node record.js <framesDir> [maxFrames]   (site served at http://localhost:8765/)
 const { chromium } = require('playwright');
 const fs = require('fs');
+const { spawn } = require('child_process');
 
-const OUT = process.argv[2];
+const OUT = process.argv[2]; // a folder for JPEG frames, or a .mp4 path to encode while recording
 const MAX = +process.argv[3] || Infinity;
+const DSF = +(process.env.DSF || 1); // device scale factor: 1.5 records 2880x1620 for sharp close-ups
+const TO_MP4 = OUT.endsWith('.mp4');
 const FPS = 30;
 const W = 1920, H = 1080;
-fs.mkdirSync(OUT, { recursive: true });
+if (!TO_MP4) fs.mkdirSync(OUT, { recursive: true });
+let frame = 0;
+const enc = TO_MP4 ? spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', '30', '-i', '-', '-c:v', 'libx264', '-crf', '15', '-preset', 'medium', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT], { stdio: ['pipe', 'inherit', 'inherit'] }) : null;
+const marks = [];
+const mark = (name, extra) => { const m = { name, t: +(frame / FPS).toFixed(3), ...extra }; marks.push(m); console.log('mark', JSON.stringify(m)); };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2); // cubic in-out
 
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--hide-scrollbars', '--autoplay-policy=no-user-gesture-required'] });
-  const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DSF });
   const p = await ctx.newPage();
   p.on('pageerror', (e) => console.error('PAGEERR', e.message));
   await p.clock.install({ time: new Date('2026-11-09T10:00:00Z') });
@@ -47,7 +54,7 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   });
 
   const s = { y: 0, mx: 1200, my: 640, cur: 0, setY: false };
-  let frame = 0, lastMouse = '';
+  let lastMouse = '';
   async function step() {
     if (frame >= MAX) throw new Error('MAX');
     if (s.setY) await p.evaluate((y) => window.__recScroll(y), s.y);
@@ -57,7 +64,8 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     if (s.cur && mk !== lastMouse) { await p.mouse.move(s.mx, s.my); lastMouse = mk; }
     await p.evaluate(([dt, mx, my, cur]) => window.__recStep(dt, mx, my, cur), [dt, s.mx, s.my, s.cur]);
     for (let k = 0; k < 40; k++) { const busy = await p.evaluate(() => { const v = document.querySelector('#drape-screen video'); return !!(v && v.seeking); }); if (!busy) break; await sleep(15); }
-    await p.screenshot({ path: `${OUT}/${String(frame).padStart(5, '0')}.jpg`, type: 'jpeg', quality: 90 });
+    if (TO_MP4) { const buf = await p.screenshot({ type: 'jpeg', quality: 93 }); if (!enc.stdin.write(buf)) await new Promise((r) => enc.stdin.once('drain', r)); }
+    else await p.screenshot({ path: `${OUT}/${String(frame).padStart(5, '0')}.jpg`, type: 'jpeg', quality: 90 });
     frame++;
     if (frame % 150 === 0) console.log('frame', frame, (frame / FPS).toFixed(1) + 's');
   }
@@ -81,6 +89,7 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   async function click(holdSec = 0.1) {
     const hit = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e ? (e.id ? '#' + e.id : '') + '.' + String(e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className).split(' ').join('.') : 'none'; }, [s.mx, s.my]);
     console.log('click', (frame / FPS).toFixed(1) + 's', hit);
+    mark('click', { x: Math.round(s.mx), y: Math.round(s.my), hit });
     await p.mouse.move(s.mx, s.my); await p.mouse.down(); await hold(0.06); await p.mouse.up(); await hold(holdSec); }
   async function key(k, sec) { await p.keyboard.press(k); await hold(sec); }
   const L = () => p.evaluate(() => {
@@ -91,9 +100,11 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   const mid = (r, f) => r[0] + (r[1] - r[0]) * f;
 
   try {
+    mark('curtain');
     // 0. Silk curtain lifts.
     await hold(3.3);
     let l = await L();
+    mark('hero');
     // 1. Hero: silk pulls back into the showroom, then dollies into the heritage beat.
     await scrollTo(mid(l.hero, 0.42), 3.6);
     await showCursor(0.3);
@@ -101,12 +112,14 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     await hold(1.0);
     await scrollTo(mid(l.hero, 0.97), 3.8);
     await hold(1.2);
+    mark('moods');
     // 2. Band and Six Moods.
     l = await L();
     await scrollTo(l.moods - 30, 2.6);
     await hold(0.4);
     await moveTo('.mood .arch', 2, 0.9, 0.5, 0.55); await hold(1.0);
     await moveTo('.mood .arch', 4, 0.8, 0.5, 0.55); await hold(0.9);
+    mark('look');
     // 3. Try the Look.
     l = await L();
     await scrollTo(l.look - 10, 2.2);
@@ -118,6 +131,7 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     await moveTo('.look-arrows .next', 0, 0.7); await click(1.5);
     await moveTo('.side-cta', 0, 0.8); await click(1.4);
     await moveTo('#look-back', 0, 0.8); await click(1.0);
+    mark('silks');
     // 4. Pick a Silk.
     l = await L();
     await scrollTo(l.silks[0], 2.0);
@@ -129,6 +143,7 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     await click(0); await flip(); await hold(1.6);
     await click(0); await flip(); await hold(1.1);
     await scrollTo(l.silks[1], 3.2);
+    mark('rack');
     // 5. The Rack.
     l = await L();
     await scrollTo(l.rack - 20, 2.0);
@@ -138,16 +153,19 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     await click(1.6);
     await moveTo('.f-add', 0, 0.8); await click(1.2);
     await moveTo('.focus-back', 0, 0.7); await click(0.7);
+    mark('muse');
     // 6. Draped in devotion.
     l = await L();
     await scrollTo(l.muse - 20, 2.2);
     await scrollTo(l.muse + 380, 3.0);
     await moveTo('.mcard-add', 4, 0.8); await click(1.2);
+    mark('drape');
     // 7. Feel the drape: the film plays in the centre screen.
     l = await L();
     await scrollTo(l.drape + 30, 2.2);
     await move(1700, 900, 0.8);
     await hold(3.4);
+    mark('reels');
     // 8. Silk, in motion and the story viewer.
     l = await L();
     await scrollTo(l.reels[0], 2.0);
@@ -155,11 +173,13 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     await moveTo('.rcard.center', 0, 0.8, 0.5, 0.45); await click(3.4);
     await key('ArrowRight', 2.4);
     await key('Escape', 0.6);
+    mark('bridal');
     // 9. Bridal.
     l = await L();
     await scrollTo(l.bridal[0], 1.8);
     await scrollTo(mid(l.bridal, 0.5), 2.6); await hold(1.2);
     await scrollTo(l.bridal[1], 2.4); await hold(1.0);
+    mark('weave');
     // 10. Three silks, one weave.
     l = await L();
     await scrollTo(l.weave, 2.2);
@@ -167,12 +187,16 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     for (const j of [0, 1, 2]) { await moveTo('.sw', j, 0.7); await click(1.5); }
     await hold(3.2);
     await moveTo('#weave-add', 0, 0.8); await click(2.6);
+    mark('footer');
     // 11. Footer.
     l = await L();
     await move(1500, 300, 0.6);
     await scrollTo(l.max, 2.6);
     await hold(2.8);
   } catch (e) { if (e.message !== 'MAX') throw e; }
+  mark('end');
+  fs.writeFileSync((TO_MP4 ? OUT.replace(/\.mp4$/, '') : OUT + '/marks') + '.json', JSON.stringify(marks, null, 1));
+  if (enc) { enc.stdin.end(); await new Promise((r) => enc.on('close', r)); }
   console.log('DONE frames', frame, (frame / FPS).toFixed(2) + 's');
   await browser.close();
 })();
