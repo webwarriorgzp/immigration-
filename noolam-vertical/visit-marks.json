@@ -1,0 +1,166 @@
+[
+ {
+  "name": "curtain",
+  "t": 0
+ },
+ {
+  "name": "hero",
+  "t": 3.3
+ },
+ {
+  "name": "moods",
+  "t": 14.2
+ },
+ {
+  "name": "look",
+  "t": 20.8
+ },
+ {
+  "name": "click",
+  "t": 26.8,
+  "x": 593,
+  "y": 484,
+  "hit": ".lm.on"
+ },
+ {
+  "name": "click",
+  "t": 31.067,
+  "x": 1195,
+  "y": 738,
+  "hit": "."
+ },
+ {
+  "name": "click",
+  "t": 33.433,
+  "x": 1393,
+  "y": 391,
+  "hit": ".pill.pill-red.side-cta"
+ },
+ {
+  "name": "click",
+  "t": 35.7,
+  "x": 413,
+  "y": 110,
+  "hit": "#look-back.back-link"
+ },
+ {
+  "name": "silks",
+  "t": 36.767
+ },
+ {
+  "name": "click",
+  "t": 43.967,
+  "x": 724,
+  "y": 556,
+  "hit": "#silk-track.silk-track"
+ },
+ {
+  "name": "click",
+  "t": 45.667,
+  "x": 724,
+  "y": 556,
+  "hit": "#silk-track.silk-track"
+ },
+ {
+  "name": "rack",
+  "t": 50.067
+ },
+ {
+  "name": "click",
+  "t": 54.667,
+  "x": 676,
+  "y": 238,
+  "hit": ".chip"
+ },
+ {
+  "name": "click",
+  "t": 58.733,
+  "x": 543,
+  "y": 549,
+  "hit": "."
+ },
+ {
+  "name": "click",
+  "t": 61.2,
+  "x": 1014,
+  "y": 584,
+  "hit": ".pill.pill-red.f-add"
+ },
+ {
+  "name": "click",
+  "t": 63.167,
+  "x": 40,
+  "y": 525,
+  "hit": "."
+ },
+ {
+  "name": "muse",
+  "t": 63.933
+ },
+ {
+  "name": "click",
+  "t": 69.933,
+  "x": 384,
+  "y": 258,
+  "hit": ".mcard-add"
+ },
+ {
+  "name": "drape",
+  "t": 71.2
+ },
+ {
+  "name": "reels",
+  "t": 77.6
+ },
+ {
+  "name": "click",
+  "t": 83.4,
+  "x": 960,
+  "y": 610,
+  "hit": "."
+ },
+ {
+  "name": "bridal",
+  "t": 89.867
+ },
+ {
+  "name": "weave",
+  "t": 98.867
+ },
+ {
+  "name": "click",
+  "t": 102.267,
+  "x": 717,
+  "y": 984,
+  "hit": ".sw"
+ },
+ {
+  "name": "click",
+  "t": 104.533,
+  "x": 771,
+  "y": 984,
+  "hit": ".sw"
+ },
+ {
+  "name": "click",
+  "t": 106.8,
+  "x": 825,
+  "y": 984,
+  "hit": ".sw"
+ },
+ {
+  "name": "click",
+  "t": 112.367,
+  "x": 1762,
+  "y": 979,
+  "hit": "#weave-add.pill.pill-gold.small"
+ },
+ {
+  "name": "footer",
+  "t": 115.033
+ },
+ {
+  "name": "end",
+  "t": 121.033
+ }
+]
