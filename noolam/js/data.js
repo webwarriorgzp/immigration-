@@ -121,8 +121,8 @@ export const DRAPE = {
     { src: A('hero-heritage.jpg'), pos: '40% 50%' },
   ],
   // The NOOLAM "One Thread" film (made in ../noolam-film). Set to null to fall back to the slideshow.
-  video: null, // A('noolam-film.mp4') once the film render is added
-  poster: null,
+  video: A('noolam-film.mp4'),
+  poster: A('noolam-film-poster.jpg'),
 };
 
 // Silk, in motion.

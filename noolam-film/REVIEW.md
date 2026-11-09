@@ -10,6 +10,10 @@
 - `npx hyperframes check`: ok. Kept on purpose: `film_silent` and `audio_none` (see above), `canvas_covered` (the lineup's white ground covers the frame by design), and WebGL `console_warning` performance notes from the software renderer.
 - Snapshots at 1.8, 4.5, 5.4, 11, 13.6, 15.15–20.6 and 25.9 s, plus the review sheets (beats, seams, phone).
 
+## Rendered
+- `renders/noolam-one-thread.mp4`: 1920×1080, 30 fps, 27.0 s, H.264, 20.5 MB, no audio track. Frames pulled from the file at 14 points match the previews.
+- Web copy for the site: `noolam/assets/noolam-film.mp4` (1280×720, CRF 26, faststart, 2.3 MB) and `noolam-film-poster.jpg`.
+
 ## Only looked at
 - Motion between sampled frames; the render's motion blur was not inspected frame by frame.
 
