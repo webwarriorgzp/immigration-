@@ -1,28 +1,31 @@
-# NOOLAM: scroll-driven silk showcase (prototype)
+# NOOLAM: scroll-driven silk showcase
 
-A single-page prototype for a fictional Kanchipuram silk brand. It's plain HTML, CSS and ES modules with no build step. Libraries load from CDNs: GSAP + ScrollTrigger, Lenis and Three.js.
+A single page that rebuilds, section by section, the NOOLAM site from the reference reel. It's plain HTML, CSS and ES modules with no build step. Libraries load from CDNs: GSAP + ScrollTrigger, Lenis and Three.js.
 
 Run it with any static server from this folder, e.g. `python3 -m http.server`, then open http://localhost:8000.
 
-## Sections
-| # | Section | Technique |
-|---|---------|-----------|
-| 1 | Hero, "Woven for the Divine" | Pinned timeline: the silk close-up clips and zooms out into the showroom |
-| 2 | Try the Look | Lineup of cut-outs; hover or tap blurs the rest and steps one forward; the side panel lists the pieces |
-| 3 | Pick a Silk | Pinned horizontal track, per-card tilt via `containerAnimation` |
-| 4 | The Rack | Filter chips; old items blur out, new ones slide in and swing from the hanger (`transform-origin: top`) |
-| 5 | Feel the drape | Parallax columns around a central clip (canvas placeholder) |
-| 6 | Silk, in motion | Reel cards open a story viewer with 3D side cards, a tinted backdrop, auto-advance, swipe and keyboard controls |
-| 7 | Bridal | Arch cards fan out on scroll |
-| 8 | Three silks, one weave | Three.js ribbons textured with real fabric crops blend from free flow into a braid as you scroll. "Choose a silk" swaps a strand and updates the price |
+## Sections, in reel order
+| # | Section | What it does |
+|---|---------|--------------|
+| 0 | Silk curtain | Intro loader: a red silk curtain with the crest lifts away on a wavy edge |
+| – | Nav + ticker | Maroon pill nav with a gold active state, bag count, "Visit the Store"; hides on scroll down. A maroon ticker is fixed to the bottom of the screen |
+| 1 | Hero | Pinned: the silk close-up pulls back into the showroom ("Woven for the Divine."), then dollies in and cuts to the artisans ("An heirloom from the first fold.") |
+| 2 | Band | Gold serif marquee on maroon with a scalloped edge, moved by scroll |
+| 3 | Six Moods | Jharokha (onion-dome) arches with cut-outs on pastel grounds; they reveal from the bottom and drift on scroll |
+| 4 | Try the Look | A lineup of cut-outs drifts sideways; hover blurs the rest; tap opens a single look with numbered hotspots, piece list, total and "Add full look to bag" |
+| 5 | Pick a Silk | Pinned 3D perspective wall of vivid cards with condensed titles; cards tilt to the pointer, press in, flip on click, spin on double-click |
+| 6 | The Rack | Filter chips with counts; cut-outs hang on hangers along a rail that drags and scrolls; filtering drops new pieces in with a swing; tapping opens a focus view with sizes and "Add to bag" |
+| 7 | Draped in devotion | A tilted 3D carousel of product cards with a diagonal phrase ribbon |
+| 8 | Feel the drape | A wide centre screen (crossfading slideshow, or a video via `DRAPE.video`) with parallax columns |
+| 9 | Silk, in motion | Pinned coverflow ring of reel cards; tapping opens a story viewer (progress bars, tap sides to skip, hold to pause, swipe down to close) |
+| 10 | Bridal | Pinned coverflow of arch cards with motion blur and snapping; name, price and "Add to cart" update |
+| 11 | Three silks, one weave | Three thin threads; each silk you pick unfurls as a fabric ribbon; three picks braid them, apply 10% off and enable "Add woven set to bag", which flies the ribbons off |
+| 12 | Footer | Magenta card with link columns and a newsletter form |
 
-## Photography
-The product photos in `assets/` come from cult91.com. They're downsized to 900px JPEGs, and each look, card, rack item and reel uses its real product name and price. "Shop the look" links to the product page on cult91.com. Try the Look uses an expanding accordion because the photos have solid backgrounds, not transparent cut-outs.
+## Assets
+- **Photography:** from cult91.com, with real product names, prices and product links (`js/data.js`).
+- **Cut-outs (`assets/cut/*.webp`):** made offline from the same photos with `@imgly/background-removal-node`, then cleaned and trimmed.
+- **Fabric (`assets/fabric-*.jpg`, `assets/swatch-*.jpg`):** cropped from the saree and suit photos.
+- **`hero-showroom.jpg`:** the cult91 store interior, with the outside sign cropped off and the back-wall logo painted over.
 
-## Swapping in assets
-All content is in `js/data.js`. Placeholders (procedural silk textures and SVG models and garments, in `js/placeholders.js`) are drawn only when an item has no asset:
-
-- Looks, cards and bridal items: add `img: 'assets/meera.png'` (a transparent PNG cut-out).
-- Rack items: add `img: 'assets/maroon-saree-hanger.png'`.
-- Drape clip: replace the `<canvas id="drape-canvas">` in `index.html` with a `<video autoplay muted loop playsinline>`.
-- Weave ribbons: pass your own seamless fabric images to `initWeave` (any canvas or image works as a texture source).
+To swap anything, edit `js/data.js`. Every section reads its content from there.

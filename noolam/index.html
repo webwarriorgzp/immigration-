@@ -2,18 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NOOLAM — Kanchipuram Silk</title>
-  <meta name="description" content="NOOLAM: Kanchipuram silk sarees, woven for the divine. A scroll-driven showcase prototype.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NOOLAM Silk Showcase</title>
+  <meta name="description" content="NOOLAM: silks woven for the divine. A scroll-driven showcase.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <!-- Floating pill nav -->
+<body class="is-loading">
+  <!-- 0. Silk curtain intro -->
+  <div class="curtain" id="curtain" aria-hidden="true">
+    <div class="curtain-silk"></div>
+    <div class="curtain-mark">
+      <svg class="crest" viewBox="0 0 64 64" aria-hidden="true"><use href="#crest"/></svg>
+      <span class="curtain-word">NOOLAM</span>
+      <span class="curtain-sub">Silks of Kanchi</span>
+    </div>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="crest" viewBox="0 0 64 64">
+        <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M32 4v6M27 14h10l-1-4h-8zM24 22h16l-2-8H26zM20 32h24l-3-10H23zM16 44h32l-4-12H20zM12 58h40l-4-14H16z"/>
+          <path d="M28 58v-8a4 4 0 0 1 8 0v8"/>
+        </g>
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></g></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+      <symbol id="i-bag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></g></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="currentColor"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M17 9l4 6M21 9l-4 6"/></g></symbol>
+    </defs>
+  </svg>
+
+  <!-- Nav pill -->
   <header class="nav" id="nav">
-    <a href="#home" class="wordmark" aria-label="NOOLAM home">NOOLAM</a>
+    <a href="#home" class="logo" aria-label="NOOLAM home">
+      <svg class="crest" viewBox="0 0 64 64" aria-hidden="true"><use href="#crest"/></svg>
+      <span class="logo-text"><b>NOOLAM</b><small>Silks of Kanchi</small></span>
+    </a>
     <nav class="nav-links" aria-label="Sections">
       <a href="#home" data-nav="home">Home</a>
       <a href="#look" data-nav="look">Try the Look</a>
@@ -23,142 +54,225 @@
       <a href="#bridal" data-nav="bridal">Bridal</a>
       <a href="#weave" data-nav="weave">The Weave</a>
     </nav>
-    <a href="#footer" class="nav-cta">Visit the Store</a>
+    <div class="nav-icons">
+      <button class="icon-btn" aria-label="Search"><svg><use href="#i-search"/></svg></button>
+      <button class="icon-btn" aria-label="Wishlist"><svg><use href="#i-heart"/></svg></button>
+      <button class="icon-btn bag" aria-label="Bag"><svg><use href="#i-bag"/></svg><span class="bag-count" id="bag-count">0</span></button>
+    </div>
+    <a href="#footer" class="pill pill-red nav-cta">Visit the Store <span class="pill-arrow"><svg><use href="#i-arrow"/></svg></span></a>
     <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
   </header>
 
   <main>
-    <!-- 1. HERO: silk close-up pulls back into the showroom -->
+    <!-- 1. Hero: silk close-up pulls back into the showroom, then dollies in -->
     <section class="hero" id="home" data-section="home">
       <div class="hero-stage">
-        <div class="hero-showroom" aria-hidden="true">
-          <div class="showroom-shelves"></div>
-          <div class="showroom-light"></div>
+        <div class="hero-layer hero-showroom"><img id="hero-showroom" alt="Inside the NOOLAM showroom"></div>
+        <div class="hero-layer hero-heritage"><img id="hero-heritage" alt="Artisans embroidering by hand"></div>
+        <div class="hero-layer hero-silk"><img id="hero-silk" alt=""></div>
+        <div class="hero-shade"></div>
+        <div class="hero-beat beat-a">
+          <p class="eyebrow eyebrow-light">◆ Kanchipuram · Pure zari · Handwoven silk</p>
+          <h1>Woven for the Divine.</h1>
+          <p class="hero-copy">NOOLAM brings the looms of Kanchipuram home. Silk in heritage colours, bordered in zari and finished by hand.</p>
+          <div class="hero-ctas">
+            <a href="#look" class="pill pill-red">Try the Look <span class="pill-arrow"><svg><use href="#i-arrow"/></svg></span></a>
+            <a href="#rack" class="pill pill-glass">Browse the Rack</a>
+          </div>
         </div>
-        <div class="hero-silk" aria-hidden="true"></div>
-        <div class="hero-copy">
-          <p class="eyebrow">Kanchipuram · Since 1962</p>
-          <h1 class="hero-title">Woven for the <em class="accent">Divine.</em></h1>
-          <p class="hero-sub">Pure mulberry silk, real zari, and six yards of patience on every loom.</p>
-          <a href="#look" class="btn">Explore the collection</a>
+        <div class="hero-beat beat-b">
+          <p class="eyebrow eyebrow-light">Heritage</p>
+          <h2>An heirloom from the first fold.</h2>
+          <p class="hero-copy">Worn once, kept for generations.</p>
         </div>
-        <div class="scroll-hint" aria-hidden="true">Scroll</div>
+        <div class="scroll-cue" aria-hidden="true"><span></span>Scroll</div>
       </div>
     </section>
 
-    <!-- 2. TRY THE LOOK: lineup, focus one model -->
+    <!-- 2. Marquee band -->
+    <div class="band" aria-hidden="true">
+      <div class="band-track" id="band-track"></div>
+      <svg class="band-wave" viewBox="0 0 1440 40" preserveAspectRatio="none"><path d="M0 0h1440v14c-60 0-60 18-120 18s-60-18-120-18-60 18-120 18-60-18-120-18-60 18-120 18-60-18-120-18-60 18-120 18-60-18-120-18-60 18-120 18-60-18-120-18-60 18-120 18S60 14 0 14z"/></svg>
+    </div>
+
+    <!-- 3. Six Moods -->
+    <section class="moods" id="archive">
+      <div class="wrap head-row">
+        <div>
+          <p class="eyebrow">The NOOLAM archive</p>
+          <h2 class="title">Six Moods. <span class="accent">Timeless Drapes</span></h2>
+        </div>
+        <p class="side-note">Six edits from the archive, each one styled around a single mood. Hover an arch to step inside.</p>
+      </div>
+      <div class="wrap mood-row" id="mood-row"></div>
+    </section>
+
+    <!-- 4. Try the Look -->
     <section class="look" id="look" data-section="look">
-      <div class="section-head">
-        <p class="eyebrow">The Lineup</p>
-        <h2>Try the <em class="accent">Look.</em></h2>
-        <p class="lede">Hover or tap a muse to step her forward and shop what she's wearing.</p>
-      </div>
-      <div class="look-wrap">
-        <div class="lineup" id="lineup" role="listbox" aria-label="Looks"></div>
-        <aside class="look-panel" id="look-panel" aria-live="polite"></aside>
+      <div class="wrap look-grid">
+        <div class="look-main">
+          <div class="look-head" id="look-head">
+            <p class="eyebrow">Styled head to toe</p>
+            <h2 class="title">Try the <span class="accent">Look.</span></h2>
+            <p class="sub">Eight looks, styled head to toe. Tap a look to see the pieces.</p>
+          </div>
+          <div class="look-detail-head" id="look-detail-head" hidden>
+            <button class="back-link" id="look-back"><svg><use href="#i-arrow"/></svg> All looks</button>
+            <p class="eyebrow" id="look-no">Look 01</p>
+            <h3 id="look-name">Noir Zari</h3>
+          </div>
+          <div class="look-stage" id="look-stage">
+            <div class="lineup" id="lineup" role="list"></div>
+            <div class="look-solo" id="look-solo" hidden></div>
+          </div>
+        </div>
+        <aside class="look-side" id="look-side" aria-live="polite"></aside>
       </div>
     </section>
 
-    <!-- 3. PICK A SILK: pinned horizontal track -->
+    <!-- 5. Pick a Silk -->
     <section class="silks" id="silks" data-section="silks">
       <div class="silks-pin">
-        <div class="section-head">
-          <p class="eyebrow">Colour story</p>
-          <h2>Pick a <em class="accent">Silk.</em></h2>
+        <div class="wrap head-row">
+          <h2 class="title">Pick a <span class="accent">Silk</span></h2>
+          <p class="side-note">Tilt a card, press it, give the silk a spin. <span class="hint-icons">↻ ✋</span></p>
         </div>
-        <div class="silk-track" id="silk-track"></div>
+        <div class="silk-scene"><div class="silk-track" id="silk-track"></div></div>
+        <p class="caption-mini">The collection</p>
       </div>
     </section>
 
-    <!-- 4. THE RACK: filterable clothes rail -->
+    <!-- 6. The Rack -->
     <section class="rack" id="rack" data-section="rack">
-      <div class="section-head">
-        <p class="eyebrow">The Rack</p>
-        <h2>Every silk, <em class="accent">on the rail.</em></h2>
+      <h2 class="title center">Every silk, <span class="accent">on the rail.</span></h2>
+      <div class="wrap chips" id="chips" role="tablist" aria-label="Filter pieces"></div>
+      <div class="rail-wrap">
+        <button class="rail-arrow prev" id="rail-prev" aria-label="Scroll rail left"><svg><use href="#i-arrow"/></svg></button>
+        <div class="rail-scroller" id="rail-scroller">
+          <div class="rail-bar" aria-hidden="true"></div>
+          <ul class="rail-items" id="rail-items"></ul>
+        </div>
+        <button class="rail-arrow next" id="rail-next" aria-label="Scroll rail right"><svg><use href="#i-arrow"/></svg></button>
+        <div class="rack-focus" id="rack-focus" hidden></div>
       </div>
-      <div class="chips" id="chips" role="tablist" aria-label="Filter pieces"></div>
-      <div class="rail">
-        <div class="rail-bar" aria-hidden="true"></div>
-        <ul class="rail-items" id="rail-items"></ul>
+      <p class="wrap caption-mini left" id="rack-count">Scroll to explore</p>
+    </section>
+
+    <!-- 7. Draped in devotion -->
+    <section class="muse" id="muse" data-section="muse">
+      <div class="wrap head-row">
+        <div>
+          <p class="eyebrow">The muse edit</p>
+          <h2 class="title big">Draped in devotion. Worn in <span class="accent">light.</span></h2>
+        </div>
+        <p class="side-note">Ten silks, each with its own story. Add one straight to your bag.</p>
+      </div>
+      <div class="muse-scene"><div class="muse-tilt"><div class="muse-track" id="muse-track"></div></div></div>
+      <div class="ribbon" aria-hidden="true"><div class="ribbon-track" id="ribbon-track"></div></div>
+      <div class="wrap muse-ctas">
+        <button class="pill pill-red" id="view-cart">View cart · <span id="cart-count-2">0</span> <span class="pill-arrow"><svg><use href="#i-arrow"/></svg></span></button>
+        <a href="#rack" class="pill pill-light">Shop the Rack</a>
       </div>
     </section>
 
-    <!-- 5. FEEL THE DRAPE: parallax grid around a central video -->
-    <section class="drape" id="muse" data-section="muse">
-      <div class="section-head">
-        <p class="eyebrow">The Muse</p>
-        <h2>Feel the <em class="accent">drape.</em></h2>
-      </div>
+    <!-- 8. Feel the drape -->
+    <section class="drape" id="drape">
       <div class="drape-grid">
-        <div class="drape-col" data-speed="-60"><div class="tile" data-tile="0"></div><div class="tile tall" data-tile="1"></div></div>
-        <div class="drape-col" data-speed="40"><div class="tile tall" data-tile="2"></div><div class="tile" data-tile="3"></div></div>
-        <div class="drape-center">
-          <!-- Drop your draping clip here: <video src="assets/drape.mp4" autoplay muted loop playsinline></video> -->
-          <canvas id="drape-canvas" aria-label="Saree being draped (placeholder animation)"></canvas>
-          <span class="drape-label">Six yards, one pleat at a time</span>
+        <div class="drape-col left" id="drape-left"></div>
+        <div class="drape-centre">
+          <p class="eyebrow center">The muse</p>
+          <h2 class="title center">Feel the <span class="accent">drape</span></h2>
+          <div class="drape-screen" id="drape-screen">
+            <span class="screen-icon"><svg><use href="#i-sound"/></svg></span>
+            <div class="screen-bar"><i id="screen-bar"></i></div>
+          </div>
+          <a href="#rack" class="pill pill-red">Purchase the Collection <span class="pill-arrow"><svg><use href="#i-arrow"/></svg></span></a>
         </div>
-        <div class="drape-col" data-speed="40"><div class="tile" data-tile="4"></div><div class="tile tall" data-tile="5"></div></div>
-        <div class="drape-col" data-speed="-60"><div class="tile tall" data-tile="6"></div><div class="tile" data-tile="7"></div></div>
+        <div class="drape-col right" id="drape-right"></div>
       </div>
     </section>
 
-    <!-- 6. SILK, IN MOTION: reels + story viewer -->
+    <!-- 9. Silk, in motion -->
     <section class="reels" id="reels">
-      <div class="section-head">
-        <p class="eyebrow">On the gram</p>
-        <h2>Silk, <em class="accent">in motion.</em></h2>
+      <div class="reels-pin">
+        <div class="wrap head-row">
+          <div>
+            <p class="eyebrow">The muse reels</p>
+            <h2 class="title">Silk, <span class="accent">in motion.</span></h2>
+          </div>
+          <div class="side-note with-btn"><span>Short films from the looms. Tap a reel to watch, then shop the drape.</span><button class="round-btn" id="reels-open" aria-label="Watch reels"><svg><use href="#i-play"/></svg></button></div>
+        </div>
+        <div class="reel-scene"><div class="reel-ring" id="reel-ring"></div></div>
       </div>
-      <div class="reel-row" id="reel-row"></div>
     </section>
 
-    <!-- 7. BRIDAL: arch cards fan out -->
+    <!-- 10. Bridal -->
     <section class="bridal" id="bridal" data-section="bridal">
-      <div class="section-head">
-        <p class="eyebrow">For the muhurtham</p>
-        <h2>The Bridal <em class="accent">Collection.</em></h2>
+      <div class="bridal-pin">
+        <p class="eyebrow center">For the muhurtham and every vow after</p>
+        <h2 class="title center">The Bridal <span class="accent">Collection</span></h2>
+        <div class="arch-scene"><div class="arch-halo"></div><div class="arch-ring" id="arch-ring"></div></div>
+        <div class="bridal-info" id="bridal-info"></div>
       </div>
-      <div class="arches" id="arches"></div>
     </section>
 
-    <!-- 8. THREE SILKS, ONE WEAVE: Three.js ribbons -->
+    <!-- 11. Three silks, one weave -->
     <section class="weave" id="weave" data-section="weave">
-      <div class="weave-pin">
-        <canvas id="weave-canvas" aria-hidden="true"></canvas>
-        <div class="weave-copy">
-          <p class="eyebrow">The Weave</p>
-          <h2>Three silks, <em class="accent">one weave.</em></h2>
-          <p class="lede">Body, border and pallu are woven separately and interlocked by hand: the korvai join.</p>
-        </div>
-        <ol class="weave-list" id="weave-list" aria-label="The three silks"></ol>
-        <div class="weave-result" id="weave-result">
-          <p class="weave-choose">Choose a silk to weave it in</p>
-          <div class="swatches" id="swatches" role="radiogroup" aria-label="Silks"></div>
-          <p class="weave-name" id="weave-name">Black &amp; Gold, Orange Tussar, Violet</p>
-        </div>
-        <div class="weave-price-box"><span>Your weave</span><strong id="weave-price">₹ 19,678</strong><a href="#footer" class="btn">Reserve</a></div>
+      <canvas id="weave-canvas" aria-hidden="true"></canvas>
+      <p class="weave-tag">Seer Varisai</p>
+      <div class="weave-top">
+        <button class="pill pill-red small" id="weave-add-top" disabled>Add to cart</button>
+        <p class="weave-offer">Any three silks, 10% off</p>
+        <p class="weave-toast" id="weave-toast" role="status"></p>
+      </div>
+      <h2 class="title center weave-title">Three silks, <span class="accent">one weave.</span></h2>
+      <ol class="weave-list" id="weave-list"></ol>
+      <div class="weave-bottom">
+        <p class="weave-label" id="weave-label">Choose a silk to weave it in</p>
+        <div class="swatches" id="swatches" role="group" aria-label="Silks"></div>
+      </div>
+      <div class="weave-price">
+        <s id="weave-was"></s><strong id="weave-total">₹0</strong>
+        <button class="pill pill-gold small" id="weave-add" hidden>Add woven set to bag</button>
       </div>
     </section>
   </main>
 
+  <!-- 12. Footer -->
   <footer class="footer" id="footer">
-    <p class="footer-line">Woven with heritage.<br>Draped for <em>today.</em></p>
-    <div class="footer-cols">
-      <div><h3>Store</h3><p>12 Gandhi Road, Kanchipuram<br>Open daily, 10am – 9pm</p></div>
-      <div><h3>Contact</h3><p>+91 00000 00000<br>hello@noolam.example</p></div>
-      <div><h3>Follow</h3><p>Instagram · YouTube · Pinterest</p></div>
+    <div class="footer-card">
+      <div class="footer-top">
+        <p class="footer-line">Woven with heritage.<br>Draped for <em>today.</em></p>
+        <p class="footer-word">NOOLAM</p>
+      </div>
+      <div class="footer-cols">
+        <div><h3>Shop</h3><a href="#rack">Silk sarees</a><a href="#rack">Suit sets</a><a href="#rack">Anarkali</a><a href="#rack">Kaftans</a></div>
+        <div><h3>Explore</h3><a href="#archive">Our story</a><a href="#weave">Craftsmanship</a><a href="#look">The lookbook</a><a href="#bridal">Bridal collection</a></div>
+        <div><h3>Support</h3><a href="#footer">Contact us</a><a href="#footer">Shipping &amp; delivery</a><a href="#footer">Returns &amp; exchanges</a></div>
+        <div><h3>Legal</h3><a href="#footer">Terms &amp; conditions</a><a href="#footer">Privacy policy</a></div>
+        <form class="footer-news" id="news">
+          <h3>Stay updated</h3>
+          <p>New collections, private previews and styling notes, delivered thoughtfully.</p>
+          <div class="news-row"><label class="sr" for="news-email">Email address</label><input id="news-email" type="email" placeholder="Your email address" required><button class="pill pill-light small" type="submit">Join</button></div>
+          <p class="news-done" id="news-done" hidden>You're on the list.</p>
+        </form>
+      </div>
+      <div class="footer-base"><span>© 2026 NOOLAM. A showcase build with photography from cult91.com.</span><a href="#home">Back to top ↑</a></div>
     </div>
-    <div class="footer-mark" aria-hidden="true"><em>NOOLAM</em></div>
-    <p class="footer-small">A fictional brand. Prototype with placeholder art; swap in your own assets in <code>js/data.js</code>.</p>
   </footer>
+
+  <!-- Fixed ticker -->
+  <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker-track"></div></div>
 
   <!-- Story viewer -->
   <div class="story" id="story" role="dialog" aria-modal="true" aria-label="Reel viewer" hidden>
     <div class="story-bg" id="story-bg"></div>
-    <div class="story-track" id="story-track"></div>
+    <div class="story-stage" id="story-stage"></div>
+    <p class="story-hint">Tap sides to skip · hold to pause · swipe down to close</p>
     <button class="story-close" id="story-close" aria-label="Close">×</button>
-    <button class="story-nav prev" id="story-prev" aria-label="Previous reel">‹</button>
-    <button class="story-nav next" id="story-next" aria-label="Next reel">›</button>
   </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>

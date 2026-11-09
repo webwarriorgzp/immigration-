@@ -1,417 +1,543 @@
-import { SILKS, HERO, LOOKS, CARDS, RACK, RACK_FILTERS, DRAPE, REELS, BRIDAL, WEAVE } from './data.js';
-import { silkTexture, silkURL, modelSVG, garmentSVG, shade, inr } from './placeholders.js';
+import { TICKER, HERO, BAND, MOODS, LOOKS, CARDS, RACK, RACK_FILTERS, MUSE, DRAPE, REELS, BRIDAL, WEAVE, WEAVE_DISCOUNT } from './data.js';
 import { initWeave } from './weave.js';
 
 const { gsap, ScrollTrigger, Lenis } = window;
 gsap.registerPlugin(ScrollTrigger);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const h = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
+const icon = (id) => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const mobile = () => innerWidth <= 860;
+const pad2 = (n) => String(n).padStart(2, '0');
+const HANGER = `<svg class="hanger" viewBox="0 0 120 60" aria-hidden="true"><path d="M60 4c7 0 9 6 6 10-2 3-6 4-6 9v5" fill="none" stroke="#9a8a78" stroke-width="3" stroke-linecap="round"/><path d="M60 28 8 52c-4 2-3 6 1 6h102c4 0 5-4 1-6z" fill="none" stroke="#a5743f" stroke-width="5" stroke-linejoin="round"/></svg>`;
 
-// Real asset if provided, otherwise the procedural placeholder.
-const figure = (item, seed) => item.img ? `<img src="${item.img}" alt="${item.name || ''}" loading="lazy">` : modelSVG(item.silk, seed);
+/* ---------------- Bag + toast ---------------- */
+const bag = { n: 0 };
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function addToBag(label, qty = 1, quiet = false) {
+  bag.n += qty;
+  const c = $('#bag-count'); c.textContent = bag.n; c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump');
+  $('#cart-count-2').textContent = bag.n;
+  if (!quiet) toast(`${label} added to your bag`);
+}
+const bagMsg = () => toast(bag.n ? `Your bag has ${bag.n} piece${bag.n > 1 ? 's' : ''}` : 'Your bag is empty');
 
-/* ---------------- Smooth scroll (Lenis -> ScrollTrigger) ---------------- */
+/* ---------------- Smooth scroll ---------------- */
 let lenis = null;
 if (!reduced && Lenis) {
   lenis = new Lenis({ lerp: 0.1 });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
-  document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
-    const target = document.querySelector(a.getAttribute('href'));
-    if (!target) return;
-    e.preventDefault();
-    lenis.scrollTo(target, { offset: 0 });
-  }));
 }
+const nav = $('#nav');
+const scrollToEl = (el) => (lenis ? lenis.scrollTo(el, { offset: 0 }) : el.scrollIntoView({ behavior: 'smooth' }));
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a || a.closest('.story')) return;
+  const id = a.getAttribute('href'); const t = id.length > 1 && document.querySelector(id);
+  if (!t) return;
+  e.preventDefault(); nav.classList.remove('open'); scrollToEl(t);
+});
 
 /* ---------------- Nav ---------------- */
-const nav = $('#nav');
-$('.nav-toggle').addEventListener('click', () => {
-  const open = nav.classList.toggle('open');
-  $('.nav-toggle').setAttribute('aria-expanded', open);
-});
-nav.querySelectorAll('.nav-links a').forEach((a) => a.addEventListener('click', () => nav.classList.remove('open')));
-function setActive(id) {
-  nav.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('active', a.dataset.nav === id));
-}
+$('.nav-toggle').addEventListener('click', () => { const o = nav.classList.toggle('open'); $('.nav-toggle').setAttribute('aria-expanded', o); });
+let lastY = 0;
+const onScroll = () => { const y = scrollY; if (y > lastY + 2 && y > 400 && !nav.classList.contains('open')) nav.classList.add('hide'); else if (y < lastY - 2) nav.classList.remove('hide'); lastY = y; };
+lenis ? lenis.on('scroll', onScroll) : addEventListener('scroll', onScroll, { passive: true });
+const setActive = (id) => $$('[data-nav]').forEach((a) => a.classList.toggle('active', a.dataset.nav === id));
 setActive('home');
+$('.bag').addEventListener('click', bagMsg);
+$('#view-cart').addEventListener('click', bagMsg);
 
-/* ---------------- 1. Hero ---------------- */
-(function hero() {
-  const heroEl = $('.hero');
-  const tl = gsap.timeline({
-    defaults: { ease: 'none' },
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140%', scrub: 0.6, pin: true, invalidateOnRefresh: true },
+/* ---------------- Ticker ---------------- */
+{
+  const tk = TICKER.map(([b, t]) => `<span><b>${b}</b>${t} <i>◆</i></span>`).join('');
+  $('#ticker-track').innerHTML = tk + tk;
+}
+
+/* ---------------- 0 + 1. Curtain and hero ---------------- */
+$('#hero-silk').src = HERO.silk; $('#hero-showroom').src = HERO.showroom; $('#hero-heritage').src = HERO.heritage;
+$('.curtain-silk').style.backgroundImage = `url(${HERO.silk})`;
+lenis?.stop();
+function liftCurtain() {
+  const done = () => { $('#curtain')?.remove(); document.body.classList.remove('is-loading'); lenis?.start(); ScrollTrigger.refresh(); };
+  if (reduced) return done();
+  gsap.timeline({ onComplete: done })
+    .from('.curtain-mark > *', { y: 24, opacity: 0, stagger: 0.12, duration: 0.7, ease: 'power2.out' })
+    .to('.curtain-mark', { y: -30, opacity: 0, duration: 0.45, ease: 'power2.in' }, '+=0.45')
+    .to('#curtain', { yPercent: -112, duration: 1.25, ease: 'power3.inOut' }, '<0.1')
+    .fromTo('.hero-silk', { scale: 1.18 }, { scale: 1, duration: 1.8, ease: 'power2.out' }, '<0.15');
+}
+Promise.race([
+  Promise.all(['#hero-silk', '#hero-showroom'].map((s) => $(s).decode().catch(() => {}))),
+  new Promise((r) => setTimeout(r, 2600)),
+]).then(liftCurtain);
+
+gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=260%', scrub: 0.7, pin: true, anticipatePin: 1 } })
+  .fromTo('#hero-silk', { scale: 1.7 }, { scale: 0.55, duration: 0.32 }, 0)
+  .to('.hero-silk', { opacity: 0, duration: 0.12 }, 0.2)
+  .fromTo('#hero-showroom', { scale: 1.5 }, { scale: 1, duration: 0.34 }, 0)
+  .to('.scroll-cue', { opacity: 0, duration: 0.05 }, 0.02)
+  .to('.hero-shade', { opacity: 1, duration: 0.1 }, 0.22)
+  .fromTo('.beat-a > *', { y: 46, opacity: 0, filter: 'blur(8px)' }, { y: 0, opacity: 1, filter: 'blur(0px)', stagger: 0.025, duration: 0.1 }, 0.26)
+  .to('.beat-a', { y: -50, opacity: 0, duration: 0.08 }, 0.58)
+  .to('#hero-showroom', { scale: 2.2, filter: 'blur(7px)', duration: 0.22 }, 0.56)
+  .to('.hero-heritage', { opacity: 1, duration: 0.1 }, 0.7)
+  .fromTo('#hero-heritage', { scale: 1.3 }, { scale: 1, duration: 0.3 }, 0.7)
+  .fromTo('.beat-b', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.1 }, 0.8)
+  .to({}, { duration: 0.08 }, 0.92);
+
+/* ---------------- 2. Band ---------------- */
+{
+  const words = BAND.map((w) => `<span>${w}</span><i>◆</i>`).join('');
+  $('#band-track').innerHTML = words.repeat(4);
+  gsap.fromTo('#band-track', { xPercent: 0 }, { xPercent: -30, ease: 'none', scrollTrigger: { trigger: '.band', start: 'top bottom', end: 'bottom top', scrub: true } });
+}
+
+/* ---------------- 3. Six Moods ---------------- */
+{
+  const row = $('#mood-row');
+  MOODS.forEach((m) => row.appendChild(h(`<a class="mood" href="#rack">
+    <div class="arch"><div class="arch-frame"></div><div class="arch-fill" style="background:linear-gradient(180deg, ${m.bg[0]}, ${m.bg[1]})"><img src="${m.img}" alt="${m.name}" loading="lazy"></div></div>
+    <span class="mood-name">${m.name}</span></a>`)));
+  gsap.fromTo('.arch', { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, stagger: 0.09, ease: 'power3.out', scrollTrigger: { trigger: row, start: 'top 85%' } });
+  gsap.from('.mood-name', { opacity: 0, y: 10, stagger: 0.09, duration: 0.6, delay: 0.5, scrollTrigger: { trigger: row, start: 'top 85%' } });
+  if (!reduced) $$('.mood').forEach((m, i) => gsap.fromTo(m, { y: i % 2 ? 40 : 0 }, { y: i % 2 ? 0 : 40, ease: 'none', scrollTrigger: { trigger: '.moods', start: 'top bottom', end: 'bottom top', scrub: true } }));
+}
+
+/* ---------------- 4. Try the Look ---------------- */
+{
+  const lineup = $('#lineup'), solo = $('#look-solo'), side = $('#look-side');
+  const track = h('<div class="lineup-track"></div>'); lineup.appendChild(track);
+  LOOKS.forEach((l, i) => track.appendChild(h(`<button class="lm" data-i="${i}" role="listitem" aria-label="Look ${i + 1}: ${l.name}"><img src="${l.img}" alt=""></button>`)));
+  const models = $$('.lm', track);
+  let mode = 'line', idx = 0;
+
+  const sideList = (hl = -1) => {
+    side.innerHTML = `<p class="side-label">The lookbook · ${LOOKS.length} looks</p>
+      <ul class="side-list">${LOOKS.map((l, i) => `<li><button class="side-item${i === hl ? ' on' : ''}" data-i="${i}"><img src="${l.thumb}" alt=""><span>${l.name}<small>${l.pieces.length} pieces</small></span><b>${inr(l.price)}</b></button></li>`).join('')}</ul>
+      <p class="side-hint">Hover a muse to preview. Tap to open the look.</p>`;
+  };
+  const sideLook = (i) => {
+    const l = LOOKS[i];
+    side.innerHTML = `<p class="side-label">Look ${pad2(i + 1)} · ${l.name}</p>
+      <ul class="side-list">${l.pieces.map((p, n) => `<li><div class="side-item piece"><span class="piece-no">${n + 1}</span><span>${p.name}<small>${p.note || 'Handwoven'}</small></span><b>${p.price ? inr(p.price) : 'Included'}</b></div></li>`).join('')}</ul>
+      <div class="side-total"><span>Full look</span><b>${inr(l.price)}</b></div>
+      <button class="pill pill-red side-cta" data-add="${i}">Add full look to bag <span class="pill-arrow">${icon('i-arrow')}</span></button>
+      <p class="side-hint"><a href="${l.url}" target="_blank" rel="noopener">View this piece on cult91.com ↗</a></p>`;
+  };
+  sideList();
+  side.addEventListener('click', (e) => {
+    const add = e.target.closest('[data-add]'); if (add) { addToBag(LOOKS[+add.dataset.add].name); return; }
+    const it = e.target.closest('.side-item[data-i]'); if (it) openSolo(+it.dataset.i);
   });
+  side.addEventListener('mouseover', (e) => { const it = e.target.closest('.side-item[data-i]'); if (it && mode === 'line') hover(+it.dataset.i); });
+  side.addEventListener('mouseleave', () => mode === 'line' && unhover());
 
-  if (HERO.img) {
-    // Photo mode: start inside the fabric, pull back until the full look sits in an arch.
-    heroEl.classList.add('has-photo');
-    const photo = h(`<figure class="hero-photo"><img src="${HERO.img}" alt="Model in a handloom silk saree"></figure>`);
-    const img = photo.querySelector('img');
-    img.style.objectPosition = HERO.focus;
-    img.style.transformOrigin = HERO.focus;
-    $('.hero-stage').insertBefore(photo, $('.hero-copy'));
-    $('.hero-showroom').style.backgroundImage = `url(${HERO.img})`;
-    $('.hero-showroom').classList.add('photo-backdrop');
-    tl.fromTo(img, { scale: 3 }, { scale: 1, duration: 1 }, 0);
-    if (matchMedia('(min-width: 801px)').matches) {
-      // Wide screens: the portrait photo settles into a full-height panel on the right.
-      tl.fromTo(photo, { width: () => innerWidth }, { width: () => Math.min(innerHeight * 0.68, innerWidth * 0.5), duration: 0.85, ease: 'power1.inOut' }, 0);
-    } else {
-      tl.fromTo(photo, { '--shade': 0 }, { '--shade': 1, duration: 0.5 }, 0.35);
-    }
-    tl.fromTo('.hero-showroom', { scale: 1.3 }, { scale: 1, duration: 1 }, 0)
-      .from('.hero-copy > *', { y: 40, opacity: 0, stagger: 0.06, duration: 0.3 }, 0.6)
-      .to('.scroll-hint', { opacity: 0, duration: 0.15 }, 0);
-    return;
-  }
-
-  const shelves = $('.showroom-shelves');
-  const keys = Object.keys(SILKS);
-  const cols = innerWidth < 700 ? 8 : 14;
-  shelves.style.setProperty('--cols', cols);
-  for (let i = 0; i < cols; i++) {
-    const k = keys[(i * 5) % keys.length];
-    const el = document.createElement('i');
-    el.style.setProperty('--h', `${48 + ((i * 37) % 30)}%`);
-    el.style.backgroundImage = `url(${silkURL(k, { w: 128, h: 256 })})`;
-    shelves.appendChild(el);
-  }
-  const silk = $('.hero-silk');
-  silk.style.backgroundImage = `url(${silkURL('maroon', { w: 512, h: 512 })})`;
-  tl.fromTo(silk, { clipPath: 'inset(0% 0% 0% 0% round 0px)', backgroundSize: '1100px' },
-               { clipPath: 'inset(24% 43% 12% 43% round 18px)', backgroundSize: '160px', duration: 1 }, 0)
-    .to(silk, { opacity: 0, duration: 0.3 }, 0.5)
-    .fromTo('.hero-showroom', { scale: 1.45 }, { scale: 1, duration: 1 }, 0)
-    .from('.hero-copy > *', { y: 40, opacity: 0, stagger: 0.06, duration: 0.3 }, 0.62)
-    .to('.scroll-hint', { opacity: 0, duration: 0.15 }, 0);
-})();
-
-/* ---------------- 2. Try the Look ---------------- */
-(function look() {
-  const lineup = $('#lineup');
-  const panel = $('#look-panel');
-  LOOKS.forEach((l, i) => {
-    const el = h(`<button class="model" role="option" aria-selected="false" data-i="${i}" aria-label="${l.name}, ${SILKS[l.silk].name}">
-      ${figure(l, i)}<span class="model-name">${l.name}</span></button>`);
-    lineup.appendChild(el);
-  });
-  const models = [...lineup.children];
-  const photoMode = LOOKS.every((l) => l.img);
-  // Photo mode: an accordion of tall slices; the chosen look opens to full width.
-  if (photoMode) lineup.classList.add('photo');
-
-  function show(i) {
-    models.forEach((m, j) => { m.classList.toggle('active', i === j); m.setAttribute('aria-selected', i === j); });
-    lineup.classList.add('has-focus');
-    const l = LOOKS[i], s = SILKS[l.silk];
-    const total = l.pieces.reduce((a, [, p]) => a + p, 0);
-    panel.innerHTML = `${l.thumb && !photoMode ? `<img class="look-thumb" src="${l.thumb}" alt="${l.name}, detail">` : ''}
-      <p class="eyebrow">Look ${String(i + 1).padStart(2, '0')}</p>
-      <h3>${l.name}</h3>
-      <p class="silk-tag"><span class="dot" style="background:${s.base}"></span>${s.name}</p>
-      <ul>${l.pieces.map(([n, p]) => `<li><span>${n}</span><b>${inr(p)}</b></li>`).join('')}</ul>
-      ${l.pieces.length > 1 ? `<p class="total"><span>Complete look</span><span>${inr(total)}</span></p>` : ''}
-      <a href="${l.url || '#footer'}" class="btn" ${l.url ? 'target="_blank" rel="noopener"' : ''}>Shop the look</a>`;
-    if (photoMode) panel.insertAdjacentHTML('beforeend', `<p class="look-list-label">All looks</p><ol class="look-list">${LOOKS.map((x, j) =>
-      `<li><button data-j="${j}" class="${j === i ? 'on' : ''}"><img src="${x.thumb || x.img}" alt=""><span>${x.name}<small>${inr(x.pieces[0][1])}</small></span></button></li>`).join('')}</ol>`);
-    gsap.fromTo(panel.children, { y: 12, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.04, duration: 0.35, overwrite: true });
-  }
-  panel.innerHTML = `<p class="eyebrow">Shop the look</p><h3>Pick a muse</h3><p class="hint">Hover or tap any model to see every piece she's wearing, with prices.</p>`;
-  if (photoMode) show(0), lineup.classList.remove('has-focus');
-
-  panel.addEventListener('click', (e) => { const b = e.target.closest('.look-list button'); if (b) { show(+b.dataset.j); models[+b.dataset.j].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } });
+  function hover(i) { lineup.classList.add('hovering'); models.forEach((m, j) => m.classList.toggle('on', i === j)); }
+  function unhover() { lineup.classList.remove('hovering'); models.forEach((m) => m.classList.remove('on')); }
   models.forEach((m, i) => {
-    m.addEventListener('mouseenter', () => show(i));
-    m.addEventListener('focus', () => show(i));
-    m.addEventListener('click', () => show(i));
+    m.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hover(i); });
+    m.addEventListener('focus', () => hover(i));
+    m.addEventListener('click', () => openSolo(i));
   });
-  // On pointer devices, releasing the lineup un-blurs everyone (panel keeps the last look).
-  lineup.addEventListener('mouseleave', () => lineup.classList.remove('has-focus'));
+  lineup.addEventListener('pointerleave', unhover);
 
-  gsap.from(models.map((m) => m.firstElementChild), { y: 80, opacity: 0, stagger: 0.05, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: lineup, start: 'top 80%' } });
-})();
-
-/* ---------------- 3. Pick a Silk ---------------- */
-(function silks() {
-  const track = $('#silk-track');
-  CARDS.forEach((c, i) => {
-    const s = SILKS[c.silk];
-    track.appendChild(h(`<article class="silk-card" style="background:${c.bg}">
-      <div class="word">${c.word}</div>
-      <div class="figure${c.img ? ' photo' : ''}">${figure({ ...c, name: c.title }, i + 2)}</div>
-      <div class="meta"><div><small>${c.title || s.name}</small><strong>${inr(c.price)}</strong></div>
-      <button class="plus" aria-label="Add ${s.name} to bag">+</button></div></article>`));
+  // Drift the lineup sideways as the section scrolls past.
+  gsap.fromTo(track, { x: () => Math.min(0, (lineup.clientWidth - track.scrollWidth) * 0.1) }, {
+    x: () => Math.min((lineup.clientWidth - track.scrollWidth) / 2, lineup.clientWidth - track.scrollWidth), ease: 'none',
+    scrollTrigger: { trigger: '.look', start: 'top 85%', end: 'bottom 15%', scrub: 1, invalidateOnRefresh: true },
   });
-  track.addEventListener('click', (e) => { const b = e.target.closest('.plus'); if (b) b.classList.toggle('added'); });
+  gsap.from(models.map((m) => m.firstElementChild), { y: 90, opacity: 0, stagger: 0.06, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: lineup, start: 'top 80%' } });
 
-  const cards = [...track.children];
-  const distance = () => Math.max(0, track.scrollWidth - innerWidth);
-  const tween = gsap.to(track, {
-    x: () => -distance(), ease: 'none',
-    scrollTrigger: { trigger: '.silks', start: 'top top', end: () => '+=' + distance(), scrub: 0.6, pin: '.silks-pin', invalidateOnRefresh: true },
+  const soloHTML = (i) => {
+    const l = LOOKS[i];
+    return `<div class="solo-fig"><img src="${l.img}" alt="${l.name}">${l.spots.map(([x, y], n) => `<button class="spot" style="left:${x}%;top:${y}%" aria-label="${l.pieces[n].name}">${n + 1}<span class="spot-tip">${l.pieces[n].name}${l.pieces[n].price ? ' · ' + inr(l.pieces[n].price) : ''}</span></button>`).join('')}</div>
+      <div class="look-arrows"><button class="arrow-btn prev" aria-label="Previous look">${icon('i-arrow')}</button><button class="arrow-btn next" aria-label="Next look">${icon('i-arrow')}</button></div>`;
+  };
+  function showSolo(i, dir = 0) {
+    idx = (i + LOOKS.length) % LOOKS.length;
+    $('#look-no').textContent = `Look ${pad2(idx + 1)}`; $('#look-name').textContent = LOOKS[idx].name;
+    sideLook(idx);
+    solo.innerHTML = soloHTML(idx);
+    gsap.fromTo('.solo-fig', { opacity: 0, x: dir * 60, scale: 0.94, filter: 'blur(12px)' }, { opacity: 1, x: 0, scale: 1, filter: 'blur(0px)', duration: 0.7, ease: 'power3.out' });
+    gsap.from('.spot', { scale: 0, stagger: 0.12, delay: 0.45, duration: 0.4, ease: 'back.out(2)' });
+  }
+  function openSolo(i) {
+    if (mode === 'solo') { showSolo(i); return; }
+    mode = 'solo'; unhover();
+    gsap.to(track, { opacity: 0, filter: 'blur(16px)', duration: 0.45, onComplete: () => { lineup.style.visibility = 'hidden'; } });
+    $('#look-head').hidden = true; $('#look-detail-head').hidden = false; solo.hidden = false;
+    gsap.from('#look-detail-head > *', { y: 14, opacity: 0, stagger: 0.06, duration: 0.4 });
+    setTimeout(() => showSolo(i), 250);
+  }
+  function closeSolo() {
+    mode = 'line';
+    gsap.to('.solo-fig', { opacity: 0, filter: 'blur(12px)', duration: 0.35, onComplete: () => { solo.hidden = true; solo.innerHTML = ''; } });
+    lineup.style.visibility = '';
+    gsap.to(track, { opacity: 1, filter: 'blur(0px)', duration: 0.6, delay: 0.2 });
+    $('#look-head').hidden = false; $('#look-detail-head').hidden = true;
+    sideList();
+  }
+  $('#look-back').addEventListener('click', closeSolo);
+  solo.addEventListener('click', (e) => {
+    if (e.target.closest('.prev')) showSolo(idx - 1, -1);
+    else if (e.target.closest('.next')) showSolo(idx + 1, 1);
+    else { const s = e.target.closest('.spot'); if (s) { $$('.spot', solo).forEach((x) => x !== s && x.classList.remove('show')); s.classList.toggle('show'); } }
   });
-  // Cards swing through a 3D arc: angled in, flat at centre, angled out.
+}
+
+/* ---------------- 5. Pick a Silk ---------------- */
+{
+  const strack = $('#silk-track'), sceneEl = $('.silk-scene');
+  CARDS.forEach((c, i) => strack.appendChild(h(`<div class="scard" data-i="${i}" tabindex="0" role="button" aria-label="${c.title}, ${inr(c.price)}. Press to turn the card.">
+    <div class="scard-in">
+      <div class="face front" style="background:${c.color}">
+        <div class="scard-title">${c.t[0]}<br>${c.t[1]}</div>
+        <img class="scard-fig" src="${c.img}" alt="" loading="lazy">
+        <button class="scard-heart" aria-label="Save ${c.title}">${icon('i-heart')}</button>
+        <span class="scard-price">${inr(c.price)}</span>
+        <button class="scard-plus" aria-label="Add ${c.title} to bag">${icon('i-plus')}</button>
+      </div>
+      <div class="face back">
+        <div><p class="b-kicker">The collection · ${pad2(i + 1)}</p><h4>${c.title}</h4></div>
+        <div class="b-swatch" style="background-color:${c.color};background-image:url(${c.img})"></div>
+        <div><p class="b-price">${inr(c.price)}</p><div class="b-actions"><button class="pill pill-red small b-add">Add to bag</button><a class="pill pill-light small" href="${c.url}" target="_blank" rel="noopener">View ↗</a></div></div>
+      </div>
+    </div></div>`)));
+  const cards = $$('.scard', strack);
+  const st = cards.map(() => ({ tx: 0, ty: 0, gx: 0, gy: 0, s: 1, gs: 1 }));
+
+  strack.addEventListener('click', (e) => {
+    const card = e.target.closest('.scard'); if (!card) return;
+    const c = CARDS[+card.dataset.i];
+    if (e.target.closest('.scard-plus')) { const b = e.target.closest('.scard-plus'); b.classList.toggle('added'); if (b.classList.contains('added')) addToBag(c.title); return; }
+    if (e.target.closest('.scard-heart')) { e.target.closest('.scard-heart').classList.toggle('on'); return; }
+    if (e.target.closest('.b-add')) { addToBag(c.title); return; }
+    if (e.target.closest('a')) return;
+    card.classList.toggle('flipped');
+  });
+  strack.addEventListener('dblclick', (e) => { const card = e.target.closest('.scard'); if (!card) return; card.classList.remove('flipped', 'spin'); void card.offsetWidth; card.classList.add('spin'); });
+  strack.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('scard')) { e.preventDefault(); e.target.classList.toggle('flipped'); } });
   cards.forEach((card, i) => {
-    gsap.set(card, { rotateY: 34, z: -180, rotateZ: 2 });
-    gsap.to(card, {
-      keyframes: [{ rotateY: 0, z: 0, rotateZ: 0, ease: 'sine.out' }, { rotateY: -34, z: -180, rotateZ: -2, ease: 'sine.in' }], ease: 'none',
-      scrollTrigger: { trigger: card, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true },
+    card.addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; const r = card.getBoundingClientRect(); st[i].gy = ((e.clientX - r.left) / r.width - 0.5) * 26; st[i].gx = -((e.clientY - r.top) / r.height - 0.5) * 20; });
+    card.addEventListener('pointerleave', () => { st[i].gx = 0; st[i].gy = 0; st[i].gs = 1; });
+    card.addEventListener('pointerdown', () => { st[i].gs = 0.94; });
+    card.addEventListener('pointerup', () => { st[i].gs = 1; });
+  });
+
+  const dist = () => Math.max(0, strack.scrollWidth - sceneEl.clientWidth + innerWidth * 0.08);
+  gsap.to(strack, { x: () => -dist(), ease: 'none', scrollTrigger: { trigger: '.silks', start: 'top top', end: () => '+=' + Math.max(innerHeight, dist() * 1.15), pin: '.silks-pin', scrub: 0.8, invalidateOnRefresh: true } });
+
+  // Perspective wall: cards near the left edge come forward, the rest recede to the right.
+  let visible = false;
+  ScrollTrigger.create({ trigger: '.silks', start: 'top bottom', end: 'bottom top', onToggle: (s) => { visible = s.isActive; } });
+  gsap.ticker.add(() => {
+    if (!visible) return;
+    const W = sceneEl.clientWidth, x0 = gsap.getProperty(strack, 'x');
+    cards.forEach((card, i) => {
+      const s = st[i];
+      s.tx += (s.gx - s.tx) * 0.12; s.ty += (s.gy - s.ty) * 0.12; s.s += (s.gs - s.s) * 0.2;
+      const cx = card.offsetLeft + card.offsetWidth / 2 + x0;
+      const t = clamp(cx / W, -0.3, 1.3);
+      const z = 150 - 520 * t, rot = 24 - 6 * t;
+      card.style.transform = `translateZ(${z.toFixed(1)}px) rotateY(${(rot + s.ty).toFixed(2)}deg) rotateX(${s.tx.toFixed(2)}deg) scale(${s.s.toFixed(3)})`;
+      card.style.zIndex = String(100 - Math.round(t * 50));
+      card.style.opacity = String(clamp((t + 0.22) / 0.2, 0, 1));
     });
   });
-})();
+}
 
-/* ---------------- 4. The Rack ---------------- */
-const HANGER = `<svg class="hanger" viewBox="0 0 200 60" aria-hidden="true"><path d="M100 4 q12 0 12 12 q0 10 -12 14 l0 10" stroke="#8c7b6a" stroke-width="3" fill="none"/><path d="M30 58 L100 38 L170 58" stroke="#8c7b6a" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;
-(function rack() {
-  const chips = $('#chips');
-  const list = $('#rail-items');
+/* ---------------- 6. The Rack ---------------- */
+{
+  const chips = $('#chips'), list = $('#rail-items'), scroller = $('#rail-scroller'), focus = $('#rack-focus');
+  const CAT = Object.fromEntries(RACK_FILTERS);
   let current = 'all', busy = false;
-
-  RACK_FILTERS.forEach(([id, label]) => chips.appendChild(
-    h(`<button class="chip" role="tab" data-f="${id}" aria-selected="${id === 'all'}">${label}</button>`)));
-
-  const render = (f) => {
+  RACK_FILTERS.forEach(([id, label]) => {
+    const n = id === 'all' ? RACK.length : RACK.filter((r) => r.cat === id).length;
+    chips.appendChild(h(`<button class="chip" role="tab" data-f="${id}" aria-selected="${id === 'all'}">${label}<span class="n">${n}</span></button>`));
+  });
+  function render(f, animate = true) {
+    const items = RACK.filter((r) => f === 'all' || r.cat === f);
     list.innerHTML = '';
-    RACK.filter((r) => f === 'all' || r.cat === f).forEach((r, i) => {
-      const li = h(`<li class="garment${r.img ? ' photo' : ''}">${r.img ? `${HANGER}<img src="${r.img}" alt="${r.name}" loading="lazy">` : garmentSVG(r.cat, r.silk)}
-        <p class="tag">${r.name}<b>${inr(r.price)}</b></p></li>`);
+    items.forEach((r, k) => {
+      const li = h(`<li class="hang" data-i="${RACK.indexOf(r)}" tabindex="0" role="button" aria-label="${r.name}, ${inr(r.price)}">${HANGER}<div class="hang-card"><img src="${r.img}" alt="" loading="lazy"></div><p class="hang-tag">${r.name}<b>${inr(r.price)}</b></p></li>`);
       list.appendChild(li);
-      if (reduced) return;
-      li.animate([{ opacity: 0, transform: 'translateX(60px) rotate(10deg)', filter: 'blur(8px)' },
-                  { opacity: 1, transform: 'translateX(0) rotate(0)', filter: 'blur(0)' }],
-                 { duration: 520, delay: i * 60, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' })
-        .finished.then(() => { li.classList.add('swing'); li.addEventListener('animationend', () => li.classList.remove('swing'), { once: true }); });
+      if (animate && !reduced) gsap.fromTo(li, { y: -160, opacity: 0, rotate: -16 }, { y: 0, opacity: 1, rotate: 0, duration: 1.4, delay: Math.min(k, 10) * 0.06, ease: 'elastic.out(1, 0.42)', clearProps: 'transform' });
     });
-  };
-
-  chips.addEventListener('click', async (e) => {
-    const b = e.target.closest('.chip');
-    if (!b || b.dataset.f === current || busy) return;
-    busy = true;
-    current = b.dataset.f;
-    chips.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-selected', c === b));
-    if (!reduced) {
-      await Promise.all([...list.children].map((li, i) => li.animate(
-        [{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(10px)', transform: 'translateY(16px) scale(.96)' }],
-        { duration: 280, delay: i * 25, fill: 'forwards', easing: 'ease-in' }).finished));
-    }
-    render(current);
-    busy = false;
-    ScrollTrigger.refresh();
+    $('#rack-count').textContent = `Scroll to explore · ${items.length} pieces`;
+    requestAnimationFrame(() => { $('.rail-bar').style.width = list.scrollWidth + 'px'; });
+  }
+  chips.addEventListener('click', (e) => {
+    const b = e.target.closest('.chip'); if (!b || busy || b.dataset.f === current) return;
+    busy = true; current = b.dataset.f;
+    $$('.chip', chips).forEach((c) => c.setAttribute('aria-selected', c === b));
+    gsap.to(list.children, { y: -70, opacity: 0, filter: 'blur(8px)', duration: 0.35, stagger: 0.015, ease: 'power2.in', onComplete: () => { scroller.scrollLeft = 0; render(current); busy = false; } });
   });
+  render('all', false);
+  ScrollTrigger.create({ trigger: scroller, start: 'top 80%', once: true, onEnter: () => render('all') });
 
-  render('all');
-})();
+  $('#rail-prev').addEventListener('click', () => scroller.scrollBy({ left: -scroller.clientWidth * 0.7, behavior: 'smooth' }));
+  $('#rail-next').addEventListener('click', () => scroller.scrollBy({ left: scroller.clientWidth * 0.7, behavior: 'smooth' }));
+  // Drag to scroll with a mouse.
+  let down = null, moved = false;
+  scroller.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return; down = { x: e.clientX, l: scroller.scrollLeft }; moved = false; });
+  addEventListener('pointermove', (e) => { if (!down) return; const dx = e.clientX - down.x; if (Math.abs(dx) > 5) { moved = true; scroller.classList.add('dragging'); } if (moved) scroller.scrollLeft = down.l - dx; });
+  addEventListener('pointerup', () => { down = null; scroller.classList.remove('dragging'); setTimeout(() => { moved = false; }, 0); });
 
-/* ---------------- 5. Feel the drape ---------------- */
-(function drape() {
-  const keys = ['teal', 'magenta', 'ivory', 'sindoor', 'peacock', 'mango', 'koorai', 'maroon'];
-  document.querySelectorAll('.tile').forEach((t) => {
-    const photo = DRAPE.tiles?.[+t.dataset.tile];
-    if (photo) { t.style.backgroundImage = `url(${photo})`; return; }
-    const k = keys[+t.dataset.tile];
-    t.style.backgroundImage = `url(${silkURL(k, { w: 320, h: 420 })})`;
-  });
+  function openFocus(r) {
+    const saree = r.cat === 'saree';
+    focus.innerHTML = `<button class="arrow-btn prev focus-back" aria-label="Back to the rail">${icon('i-arrow')}</button>
+      <div class="focus-fig">${HANGER}<div class="hang-card"><img src="${r.img}" alt="${r.name}"></div></div>
+      <div class="focus-info"><p class="k">${CAT[r.cat]}</p><h3>${r.name}</h3><p class="p">${inr(r.price)}</p>
+        <div class="sizes">${(saree ? ['Free size'] : ['XS', 'S', 'M', 'L', 'XL']).map((s, k) => `<button class="${(saree || k === 2) ? 'on' : ''}">${s}</button>`).join('')}</div>
+        <div class="focus-actions"><button class="pill pill-red f-add">Add to bag <span class="pill-arrow">${icon('i-arrow')}</span></button><a href="${r.url}" target="_blank" rel="noopener">View details ↗</a></div></div>`;
+    focus.hidden = false;
+    gsap.fromTo(focus, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+    gsap.fromTo('.focus-fig', { y: -60, scale: 0.7, rotate: -10 }, { y: 0, scale: 1, rotate: 0, duration: 1.3, ease: 'elastic.out(1, 0.5)' });
+    gsap.from('.focus-info > *', { x: 24, opacity: 0, stagger: 0.06, delay: 0.15, duration: 0.5 });
+    focus.querySelector('.f-add').addEventListener('click', (e) => { addToBag(r.name); e.currentTarget.firstChild.textContent = 'Added to bag '; });
+    focus.querySelector('.sizes').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; $$('.sizes button', focus).forEach((x) => x.classList.toggle('on', x === b)); });
+    focus.querySelector('.focus-back').addEventListener('click', closeFocus);
+  }
+  function closeFocus() { gsap.to(focus, { opacity: 0, duration: 0.25, onComplete: () => { focus.hidden = true; focus.innerHTML = ''; } }); }
+  list.addEventListener('click', (e) => { const li = e.target.closest('.hang'); if (li && !moved) openFocus(RACK[+li.dataset.i]); });
+  list.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.classList.contains('hang')) openFocus(RACK[+e.target.dataset.i]); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !focus.hidden) closeFocus(); });
+}
+
+/* ---------------- 7. Draped in devotion ---------------- */
+{
+  const track = $('#muse-track');
+  MUSE.forEach((m, i) => track.appendChild(h(`<article class="mcard"><img src="${m.img}" alt="${m.name}" loading="lazy"><span class="mcard-no">${pad2(i + 1)}</span>
+    <div class="mcard-body"><p class="k">${m.kind}</p><h4>${m.name}</h4><p>${m.desc}</p><div class="mcard-row"><b>${inr(m.price)}</b><button class="mcard-add" data-i="${i}">ADD TO CART</button></div></div></article>`)));
+  track.addEventListener('click', (e) => { const b = e.target.closest('.mcard-add'); if (!b) return; addToBag(MUSE[+b.dataset.i].name); b.classList.add('added'); b.textContent = 'IN BAG'; });
+  gsap.fromTo(track, { x: () => innerWidth * 0.2 }, { x: () => -(track.scrollWidth - innerWidth * 0.75), ease: 'none', scrollTrigger: { trigger: '.muse', start: 'top bottom', end: 'bottom top', scrub: 1, invalidateOnRefresh: true } });
+  const phrases = [['Ten silks.', 'Ten muses.'], ['Every thread', 'an offering.'], ['Woven by hand.', 'Worn in devotion.']];
+  const line = phrases.map(([a, b]) => `<span>${a} <span class="accent">${b}</span></span><i>◆</i>`).join('');
+  $('#ribbon-track').innerHTML = line.repeat(4);
+  gsap.fromTo('#ribbon-track', { xPercent: -40 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.muse', start: 'top bottom', end: 'bottom top', scrub: true } });
+}
+
+/* ---------------- 8. Feel the drape ---------------- */
+{
+  $('#drape-left').innerHTML = DRAPE.left.map((s) => `<div class="tile"><img src="${s}" alt="" loading="lazy"></div>`).join('');
+  $('#drape-right').innerHTML = DRAPE.right.map((s, i) => i === 2
+    ? `<div class="tile promo"><img src="${s}" alt="" loading="lazy"><span>New in<b>Handloom</b></span></div>`
+    : `<div class="tile"><img src="${s}" alt="" loading="lazy"></div>`).join('');
   if (!reduced) {
-    document.querySelectorAll('.drape-col').forEach((col) => {
-      const sp = +col.dataset.speed;
-      gsap.fromTo(col, { y: -sp }, { y: sp, ease: 'none', scrollTrigger: { trigger: '.drape-grid', start: 'top bottom', end: 'bottom top', scrub: true } });
-    });
+    gsap.fromTo('#drape-left', { y: 90 }, { y: -90, ease: 'none', scrollTrigger: { trigger: '.drape', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.fromTo('#drape-right', { y: -60 }, { y: 140, ease: 'none', scrollTrigger: { trigger: '.drape', start: 'top bottom', end: 'bottom top', scrub: true } });
   }
-
-  // Placeholder "draping" clip: cloth bands rippling down from the shoulder.
-  const centre = $('.drape-center');
+  const screen = $('#drape-screen'), bar = $('#screen-bar');
   if (DRAPE.video) {
-    $('#drape-canvas').replaceWith(h(`<video src="${DRAPE.video}" autoplay muted loop playsinline></video>`));
-    return;
+    screen.insertAdjacentHTML('afterbegin', `<video src="${DRAPE.video}" autoplay muted loop playsinline></video>`);
+  } else {
+    screen.insertAdjacentHTML('afterbegin', DRAPE.slides.map((s, i) => `<img src="${s.src}" alt="" style="object-position:${s.pos}" class="${i ? '' : 'on'}" loading="lazy">`).join(''));
+    const slides = $$('img', screen); let cur = 0, tw = null;
+    const play = () => { tw = gsap.fromTo(bar, { width: '0%' }, { width: '100%', duration: 3.8, ease: 'none', onComplete: () => { slides[cur].classList.remove('on'); cur = (cur + 1) % slides.length; slides[cur].classList.add('on'); play(); } }); };
+    ScrollTrigger.create({ trigger: screen, start: 'top bottom', end: 'bottom top', onToggle: (s) => { if (s.isActive) { tw ? tw.resume() : play(); } else tw?.pause(); } });
   }
-  if (DRAPE.slides?.length) {
-    // Crossfading slideshow with a slow push-in, standing in for the draping clip.
-    $('#drape-canvas').replaceWith(h(`<div class="drape-slides">${DRAPE.slides.map((src, i) => `<img src="${src}" alt="" class="${i ? '' : 'on'}" loading="lazy">`).join('')}</div>`));
-    const slides = [...centre.querySelectorAll('.drape-slides img')];
-    let cur = 0;
-    if (!reduced) setInterval(() => { slides[cur].classList.remove('on'); cur = (cur + 1) % slides.length; slides[cur].classList.add('on'); }, 3200);
-    return;
-  }
-  const cv = $('#drape-canvas');
-  const g = cv.getContext('2d');
-  const tex = silkTexture('magenta', { w: 256, h: 256 });
-  let pat, running = false, w = 0, hgt = 0;
-  const size = () => {
-    const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio, 2);
-    w = cv.width = Math.round(r.width * d); hgt = cv.height = Math.round(r.height * d);
-    pat = g.createPattern(tex, 'repeat');
-  };
-  const draw = (t) => {
-    if (!running) return;
-    t /= 1000;
-    g.fillStyle = '#f6ebe2'; g.fillRect(0, 0, w, hgt);
-    const bands = 7;
-    for (let b = 0; b < bands; b++) {
-      const x0 = w * (0.18 + b * 0.09);
-      g.beginPath();
-      g.moveTo(x0, 0);
-      for (let y = 0; y <= hgt; y += 8) {
-        const k = y / hgt;
-        g.lineTo(x0 + Math.sin(k * 6 + t * 1.6 + b * 0.7) * 18 * k * (w / 400) + k * k * w * 0.12 * Math.sin(t * 0.5 + b), y);
-      }
-      const x1 = x0 + w * 0.11;
-      for (let y = hgt; y >= 0; y -= 8) {
-        const k = y / hgt;
-        g.lineTo(x1 + Math.sin(k * 6 + t * 1.6 + b * 0.7 + 0.5) * 18 * k * (w / 400) + k * k * w * 0.12 * Math.sin(t * 0.5 + b), y);
-      }
-      g.closePath();
-      g.save();
-      g.translate(0, (t * 30) % 256);
-      g.fillStyle = pat; g.fill();
-      g.restore();
-      const shadeG = g.createLinearGradient(x0, 0, x1, 0);
-      shadeG.addColorStop(0, 'rgba(0,0,0,.28)'); shadeG.addColorStop(0.5, 'rgba(255,255,255,.12)'); shadeG.addColorStop(1, 'rgba(0,0,0,.2)');
-      g.fillStyle = shadeG; g.fill();
-    }
-    requestAnimationFrame(draw);
-  };
-  new IntersectionObserver(([e]) => {
-    if (e.isIntersecting && !running) { size(); running = true; requestAnimationFrame(draw); }
-    else if (!e.isIntersecting) running = false;
-  }).observe(cv);
-  addEventListener('resize', () => running && size());
-})();
+}
 
-/* ---------------- 6. Reels + story viewer ---------------- */
-(function reels() {
-  const row = $('#reel-row');
-  const story = $('#story'), track = $('#story-track'), bg = $('#story-bg');
-  const bgFor = (r) => r.img ? `url(${r.img});background-size:auto 112%;background-position:50% 0%` : `url(${silkURL(r.silk, { w: 360, h: 640, border: true })})`;
-  REELS.forEach((r, i) => row.appendChild(h(`<button class="reel" data-i="${i}" style="background-image:${bgFor(r)}" aria-label="Play reel: ${r.title}">
-    <span class="play">▶</span><span>${r.title}</span></button>`)));
-
-  // Story cards (one per reel). Drop real clips in by adding <video> inside .story-card.
-  REELS.forEach((r) => track.appendChild(h(`<div class="story-card" style="background-image:${bgFor(r)}">
-    <div class="bar"><i></i></div>
-    <div class="head"><span class="avatar">N</span>noolam.silks<button class="mute" aria-label="Mute">🔇</button></div>
-    <div class="caption"><p>${r.title}</p><a href="#rack" class="story-shop">Shop this look</a></div></div>`)));
-  const cards = [...track.children];
-  let idx = 0, lastFocus = null;
-
-  function layout() {
+/* ---------------- 9. Silk, in motion + story viewer ---------------- */
+{
+  const ring = $('#reel-ring');
+  REELS.forEach((r, i) => ring.appendChild(h(`<button class="rcard" data-i="${i}" style="background-image:url(${r.img})" aria-label="Play reel: ${r.title}">
+    <span class="rcard-top"><span>REEL ${r.no}</span><span>♥</span></span><span class="rcard-play">${icon('i-play')}</span>
+    <span class="rcard-body"><span class="k">${r.kind}</span><span class="rcard-title">${r.title}</span><span class="rcard-sub">${r.sub}</span></span></button>`)));
+  const cards = $$('.rcard', ring);
+  function layoutRing(a) {
+    const w = cards[0].offsetWidth;
     cards.forEach((c, i) => {
-      const d = i - idx, ad = Math.abs(d);
-      c.classList.toggle('current', d === 0);
-      c.style.zIndex = 10 - ad;
-      c.style.opacity = ad > 1 ? 0 : d === 0 ? 1 : 0.55;
-      c.style.filter = d === 0 ? 'none' : 'brightness(.7)';
-      c.style.pointerEvents = ad > 1 ? 'none' : 'auto';
-      c.style.transform = `translateX(${d * 78}%) translateZ(${-ad * 220}px) rotateY(${-d * 28}deg) scale(${d === 0 ? 1 : 0.86})`;
-      // restart progress bar
-      const bar = c.querySelector('.bar i'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = '';
-      c.getAnimations().forEach((an) => an.cancel());
+      const d = i - a, ad = Math.abs(d);
+      const x = Math.sign(d) * w * (ad <= 1 ? ad * 0.92 : 0.92 + (ad - 1) * 0.66);
+      const rot = -clamp(d, -3, 3) * 24, z = -ad * 170, s = 1 - Math.min(ad, 4) * 0.07;
+      c.style.transform = `translate(-50%, -50%) translateX(${x.toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rot.toFixed(2)}deg) scale(${s.toFixed(3)})`;
+      c.style.zIndex = String(100 - Math.round(ad * 10));
+      c.style.opacity = String(clamp(1 - Math.max(0, ad - 3.2), 0, 1));
+      c.classList.toggle('center', ad < 0.5);
     });
-    bg.style.backgroundColor = REELS[idx].tint;
-    bg.style.backgroundImage = REELS[idx].img ? `url(${REELS[idx].img})` : 'none';
-    cards[idx].animate([{ backgroundPosition: '50% 0%' }, { backgroundPosition: '50% 100%' }], { duration: 6000, fill: 'forwards' });
   }
-  const go = (i) => { idx = (i + cards.length) % cards.length; layout(); };
-  function open(i) {
-    lastFocus = document.activeElement;
-    story.hidden = false; lenis?.stop(); document.body.style.overflow = 'hidden';
+  const n = REELS.length;
+  let active = 1.5;
+  layoutRing(active);
+  ScrollTrigger.create({ trigger: '.reels', start: 'top top', end: '+=160%', pin: '.reels-pin', scrub: true, onUpdate: (s) => { active = 1.5 + s.progress * (n - 3); layoutRing(active); }, onRefresh: () => layoutRing(active) });
+  ring.addEventListener('click', (e) => { const c = e.target.closest('.rcard'); if (c) openStory(+c.dataset.i); });
+  $('#reels-open').addEventListener('click', () => openStory(Math.round(active)));
+
+  // Story viewer
+  const story = $('#story'), stage = $('#story-stage'), bg = $('#story-bg');
+  REELS.forEach((r, i) => stage.appendChild(h(`<div class="scard2" data-i="${i}" style="background-image:url(${r.img})">
+    <div class="kb" style="background-image:url(${r.img})"></div>
+    <div class="s-ui">
+      <div class="s-bars">${REELS.map(() => '<span><i></i></span>').join('')}</div>
+      <div class="s-head"><span class="s-avatar">N</span><span><b>noolam</b><small>${r.place}</small></span><button class="s-mute" aria-label="Sound">${icon('i-sound')}</button></div>
+      <div class="s-foot"><p class="k">${r.kind}</p><h4>${r.title}</h4><p>${r.sub}</p>
+        <div class="s-row"><b>${inr(r.price)}</b><button class="pill pill-red small s-add">Add to bag</button><button class="s-heart" aria-label="Save">${icon('i-heart')}</button><a class="s-more" href="${r.url}" target="_blank" rel="noopener">More drapes</a></div></div>
+    </div>
+    <span class="side-label">${r.title}</span></div>`)));
+  const scards = $$('.scard2', stage);
+  let sIdx = 0, tween = null, kb = null, lastFocus = null;
+  function place() {
+    scards.forEach((c, i) => {
+      let d = i - sIdx; if (d > n / 2) d -= n; if (d < -n / 2) d += n;
+      const ad = Math.abs(d);
+      c.classList.toggle('side', d !== 0);
+      c.style.zIndex = String(10 - ad);
+      c.style.opacity = ad > 1 ? '0' : d === 0 ? '1' : '0.75';
+      c.style.pointerEvents = ad > 1 ? 'none' : 'auto';
+      c.style.filter = d === 0 ? 'none' : 'brightness(.6)';
+      c.style.transform = d === 0 ? 'none' : `translateX(${d * (mobile() ? 62 : 92)}%) translateZ(-320px) rotateY(${-d * 24}deg) scale(.6)`;
+    });
+    bg.style.backgroundImage = `url(${REELS[sIdx].img})`;
+    bg.style.backgroundColor = REELS[sIdx].tint;
+    const cur = scards[sIdx];
+    $$('.s-bars span', cur).forEach((s, k) => { s.classList.toggle('done', k < sIdx); s.querySelector('i').style.width = k < sIdx ? '100%' : '0%'; });
+    tween?.kill(); kb?.kill();
+    kb = gsap.fromTo($('.kb', cur), { scale: 1.02, backgroundPosition: '50% 0%' }, { scale: 1.12, backgroundPosition: '50% 60%', duration: 6, ease: 'none' });
+    tween = gsap.to($$('.s-bars span', cur)[sIdx].querySelector('i'), { width: '100%', duration: 6, ease: 'none', onComplete: () => go(sIdx + 1) });
+  }
+  const go = (i) => { sIdx = (i + n) % n; place(); };
+  function openStory(i) {
+    lastFocus = document.activeElement; story.hidden = false; lenis?.stop(); document.body.style.overflow = 'hidden';
     go(i);
-    gsap.fromTo(track, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'power3.out' });
+    gsap.fromTo(stage, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'power3.out' });
     $('#story-close').focus();
   }
-  function close() {
-    story.hidden = true; lenis?.start(); document.body.style.overflow = '';
-    lastFocus?.focus();
-  }
-  row.addEventListener('click', (e) => { const r = e.target.closest('.reel'); if (r) open(+r.dataset.i); });
-  cards.forEach((c, i) => {
-    c.addEventListener('click', (e) => {
-      if (e.target.closest('.story-shop')) { e.preventDefault(); close(); lenis ? lenis.scrollTo('#rack') : $('#rack').scrollIntoView(); return; }
-      if (e.target.closest('.mute')) { e.target.textContent = e.target.textContent === '🔇' ? '🔊' : '🔇'; return; } if (i !== idx) go(i); });
-    c.querySelector('.bar i').addEventListener('animationend', () => { if (i === idx && !story.hidden) go(idx + 1); });
+  function closeStory() { tween?.kill(); kb?.kill(); story.hidden = true; lenis?.start(); document.body.style.overflow = ''; lastFocus?.focus(); }
+  $('#story-close').addEventListener('click', closeStory);
+  addEventListener('keydown', (e) => { if (story.hidden) return; if (e.key === 'Escape') closeStory(); if (e.key === 'ArrowRight') go(sIdx + 1); if (e.key === 'ArrowLeft') go(sIdx - 1); });
+  let press = null;
+  stage.addEventListener('pointerdown', (e) => {
+    const c = e.target.closest('.scard2'); if (!c || c.classList.contains('side') || e.target.closest('button, a')) return;
+    press = { x: e.clientX, y: e.clientY, t: Date.now(), c }; tween?.pause(); kb?.pause();
   });
-  $('#story-close').addEventListener('click', close);
-  $('#story-prev').addEventListener('click', () => go(idx - 1));
-  $('#story-next').addEventListener('click', () => go(idx + 1));
-  addEventListener('keydown', (e) => {
-    if (story.hidden) return;
-    if (e.key === 'Escape') close();
-    if (e.key === 'ArrowRight') go(idx + 1);
-    if (e.key === 'ArrowLeft') go(idx - 1);
+  stage.addEventListener('pointerup', (e) => {
+    if (!press) return;
+    const p = press; press = null;
+    const dy = e.clientY - p.y, dt = Date.now() - p.t, r = p.c.getBoundingClientRect();
+    if (dy > 90) { closeStory(); return; }
+    if (dt < 250) { const fx = (e.clientX - r.left) / r.width; if (fx < 0.33) { go(sIdx - 1); return; } if (fx > 0.67) { go(sIdx + 1); return; } }
+    tween?.resume(); kb?.resume();
   });
-  let sx = null;
-  track.addEventListener('pointerdown', (e) => { sx = e.clientX; });
-  track.addEventListener('pointerup', (e) => { if (sx !== null && Math.abs(e.clientX - sx) > 40) go(idx + (e.clientX < sx ? 1 : -1)); sx = null; });
+  stage.addEventListener('click', (e) => {
+    const c = e.target.closest('.scard2'); if (!c) return;
+    if (c.classList.contains('side')) { go(+c.dataset.i); return; }
+    if (e.target.closest('.s-add')) addToBag(REELS[sIdx].title);
+    else if (e.target.closest('.s-heart')) e.target.closest('.s-heart').classList.toggle('on');
+  });
+}
 
-  gsap.from('.reel', { y: 60, opacity: 0, stagger: 0.07, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: row, start: 'top 85%' } });
-})();
-
-/* ---------------- 7. Bridal arches ---------------- */
-(function bridal() {
-  const wrap = $('#arches');
-  BRIDAL.forEach((b, i) => wrap.appendChild(h(b.img
-    ? `<figure class="arch photo" style="background-image:url(${b.img})"><span>${b.name}</span></figure>`
-    : `<figure class="arch" style="background-image:url(${silkURL(b.silk, { w: 300, h: 460 })})">
-    <div class="figure">${figure(b, i + 4)}</div><span>${b.name}</span></figure>`)));
-  const arches = [...wrap.children];
-  const mid = (arches.length - 1) / 2;
-  const spread = () => Math.min(innerWidth * 0.17, 210);
-  arches.forEach((a, i) => {
-    const d = i - mid;
-    a.style.zIndex = 10 - Math.abs(d);
-    gsap.fromTo(a, { x: 0, rotate: d * 2, y: 0 }, {
-      x: () => d * spread(), rotate: d * 9, y: Math.abs(d) * 26, ease: 'power2.out',
-      scrollTrigger: { trigger: wrap, start: 'top 85%', end: 'center 55%', scrub: 0.8, invalidateOnRefresh: true },
+/* ---------------- 10. Bridal ---------------- */
+{
+  const ring = $('#arch-ring'), info = $('#bridal-info');
+  BRIDAL.forEach((b, i) => ring.appendChild(h(`<button class="bcard" data-i="${i}" style="background-image:url(${b.img})" aria-label="${b.name}"></button>`)));
+  const cards = $$('.bcard', ring), n = BRIDAL.length;
+  let shown = -1, st = null, blur = 0, a = 0;
+  function layout() {
+    const w = cards[0].offsetWidth;
+    cards.forEach((c, i) => {
+      const d = i - a, ad = Math.abs(d);
+      const x = Math.sign(d) * w * (ad <= 1 ? ad * 0.78 : 0.78 + (ad - 1) * 0.58);
+      const y = Math.min(ad, 4) ** 2 * 7, rz = clamp(d, -4, 4) * 7, ry = -clamp(d, -4, 4) * 12, z = -ad * 110, s = 1 - Math.min(ad, 4) * 0.09;
+      c.style.transform = `translateX(${x.toFixed(1)}px) translateY(${y.toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateZ(${rz.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale(${s.toFixed(3)})`;
+      c.style.zIndex = String(100 - Math.round(ad * 10));
+      c.style.opacity = String(clamp(1 - Math.max(0, ad - 3) * 0.8, 0, 1));
+      c.style.filter = blur > 0.3 ? `blur(${(blur * (ad < 0.5 ? 0.4 : 1)).toFixed(1)}px)` : 'none';
     });
-  });
-})();
-
-/* ---------------- 8. The weave ---------------- */
-(function weave() {
-  const loom = [0, 1, 2];      // indexes into WEAVE currently on the three strands
-  let next = 0, scene = null, visible = false;
-  const state = { progress: 0 };
-  const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
-  const srcFor = (w) => (w.tex ? loadImg(w.tex) : Promise.resolve(silkTexture(w.silk, { w: 1024, h: 256 })));
-  const thumb = (w) => w.tex || silkURL(w.silk, { w: 128, h: 128 });
-
-  const sw = $('#swatches');
-  sw.innerHTML = WEAVE.map((w, j) => `<button role="radio" data-j="${j}" style="background-image:url(${thumb(w)})" aria-label="${w.name}, ${inr(w.price)}" title="${w.name}"></button>`).join('');
-  function render() {
-    sw.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', loom.includes(+b.dataset.j)));
-    $('#weave-list').innerHTML = loom.map((j, n) => `<li><span class="dot" style="background-image:url(${thumb(WEAVE[j])})"></span><span>${String(n + 1).padStart(2, '0')} ${WEAVE[j].name}</span><b>${inr(WEAVE[j].price)}</b></li>`).join('');
-    $('#weave-name').textContent = loom.map((j) => WEAVE[j].name).join(' · ');
-    $('#weave-price').textContent = inr(loom.reduce((a, j) => a + WEAVE[j].price, 0));
+    const k = clamp(Math.round(a), 0, n - 1);
+    if (k !== shown) { shown = k; renderInfo(k); }
   }
+  function renderInfo(k) {
+    const b = BRIDAL[k];
+    info.innerHTML = `<h3>${b.name}</h3><p>${b.sub}</p>
+      <div class="row"><b>${inr(b.price)}</b><button class="pill pill-red small" data-add="${k}">Add to cart</button></div>
+      <div class="row"><button class="arrow-btn prev" aria-label="Previous">${icon('i-arrow')}</button><div class="bridal-dots">${BRIDAL.map((_, j) => `<i class="${j === k ? 'on' : ''}"></i>`).join('')}</div><button class="arrow-btn next" aria-label="Next">${icon('i-arrow')}</button></div>`;
+    gsap.from(info.querySelectorAll('h3, p'), { y: 10, opacity: 0, filter: 'blur(6px)', stagger: 0.05, duration: 0.35 });
+  }
+  const goTo = (k) => { if (!st) return; const kk = clamp(k, 0, n - 1); const y = st.start + (kk / (n - 1)) * (st.end - st.start); lenis ? lenis.scrollTo(y) : scrollTo({ top: y, behavior: 'smooth' }); };
+  info.addEventListener('click', (e) => {
+    const add = e.target.closest('[data-add]'); if (add) { addToBag(BRIDAL[+add.dataset.add].name); return; }
+    if (e.target.closest('.prev')) goTo(shown - 1); else if (e.target.closest('.next')) goTo(shown + 1);
+  });
+  ring.addEventListener('click', (e) => { const c = e.target.closest('.bcard'); if (c) goTo(+c.dataset.i); });
+  layout();
+  st = ScrollTrigger.create({ trigger: '.bridal', start: 'top top', end: '+=180%', pin: '.bridal-pin', scrub: 0.6,
+    snap: { snapTo: 1 / (n - 1), duration: { min: 0.2, max: 0.6 }, ease: 'power2.inOut' },
+    onUpdate: (s) => { a = s.progress * (n - 1); blur = Math.min(5, Math.abs(s.getVelocity()) / 500); layout(); },
+    onRefresh: () => layout() });
+  gsap.ticker.add(() => { if (blur > 0.3) { blur *= 0.9; layout(); } });
+}
+
+/* ---------------- 11. Three silks, one weave ---------------- */
+{
+  const ws = initWeave($('#weave-canvas'));
+  const slots = [null, null, null];
+  const RN = ['I', 'II', 'III'];
+  const sw = $('#swatches'), label = $('#weave-label');
+  sw.innerHTML = WEAVE.map((w, j) => `<button class="sw" data-j="${j}" style="background-image:url(${w.sw})" aria-label="${w.name}, ${inr(w.price)}" aria-pressed="false"></button>`).join('');
+  const imgCache = {};
+  const load = (src) => imgCache[src] || (imgCache[src] = new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.src = src; }));
+  const count = () => slots.filter((s) => s !== null).length;
+  const defaultLabel = () => (count() === 3 ? 'Woven as one' : 'Choose a silk to weave it in');
+  function ui() {
+    $('#weave-list').innerHTML = slots.map((j, k) => `<li class="${j !== null ? 'on' : ''}"><span class="rn">${RN[k]}</span><span>${j !== null ? WEAVE[j].name : 'A thread, waiting'}</span>${j !== null ? `<button data-k="${k}" aria-label="Remove ${WEAVE[j].name}">×</button>` : '<span></span>'}</li>`).join('');
+    $$('.sw', sw).forEach((b) => { const k = slots.indexOf(+b.dataset.j); b.classList.toggle('on', k > -1); b.setAttribute('aria-pressed', k > -1); b.innerHTML = k > -1 ? `<span class="rn">${RN[k]}</span>` : ''; });
+    const sum = slots.reduce((t, j) => t + (j !== null ? WEAVE[j].price : 0), 0), full = count() === 3;
+    sw.classList.toggle('full', full);
+    $('#weave-was').textContent = full ? inr(sum) : '';
+    $('#weave-total').textContent = inr(full ? sum * (1 - WEAVE_DISCOUNT) : sum);
+    $('#weave-add').hidden = !full; $('#weave-add-top').disabled = !full;
+    if (!label.classList.contains('name')) label.textContent = defaultLabel();
+    if (ws) gsap.to(ws.state, { braid: full ? 1 : 0, duration: full ? 2.4 : 1.2, delay: full ? 1.1 : 0, ease: 'power2.inOut', overwrite: 'auto' });
+  }
+  sw.addEventListener('pointerover', (e) => { const b = e.target.closest('.sw'); if (!b) return; label.textContent = WEAVE[+b.dataset.j].name; label.classList.add('name'); });
+  sw.addEventListener('pointerout', () => { label.classList.remove('name'); label.textContent = defaultLabel(); });
+  function remove(k) { if (ws) gsap.to(ws.state.strands[k], { fill: 0, duration: 0.8, ease: 'power2.in' }); slots[k] = null; ui(); }
   sw.addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b) return;
-    const j = +b.dataset.j; if (loom.includes(j)) return;
-    const slot = next; next = (next + 1) % 3; loom[slot] = j; render();
-    srcFor(WEAVE[j]).then((src) => scene?.setTexture(slot, src));
+    const b = e.target.closest('.sw'); if (!b) return;
+    const j = +b.dataset.j, has = slots.indexOf(j);
+    if (has > -1) { remove(has); return; }
+    const k = slots.indexOf(null); if (k < 0) return;
+    slots[k] = j; ui();
+    load(WEAVE[j].tex).then((im) => { if (!ws || slots[k] !== j) return; ws.setTexture(k, im); gsap.fromTo(ws.state.strands[k], { fill: 0 }, { fill: 1, duration: 1.8, ease: 'power2.inOut' }); });
   });
-  render();
+  $('#weave-list').addEventListener('click', (e) => { const b = e.target.closest('button[data-k]'); if (b) remove(+b.dataset.k); });
+  function addSet() {
+    if (count() < 3) return;
+    const sum = slots.reduce((t, j) => t + WEAVE[j].price, 0);
+    addToBag('Woven set', 1, true);
+    const t = $('#weave-toast'); t.textContent = `Woven and in your bag. You saved ${inr(sum * WEAVE_DISCOUNT)}`; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+    const reset = () => { slots.fill(null); if (ws) { ws.state.strands.forEach((s) => { s.fill = 0; }); ws.state.braid = 0; ws.state.scatter = 0; } ui(); };
+    if (ws) { gsap.killTweensOf(ws.state); gsap.to(ws.state, { scatter: 1, duration: 1.4, ease: 'power2.in', onComplete: reset }); } else reset();
+  }
+  $('#weave-add').addEventListener('click', addSet);
+  $('#weave-add-top').addEventListener('click', addSet);
+  ui();
+  ScrollTrigger.create({ trigger: '.weave', start: 'top bottom', end: 'bottom top', onToggle: (s) => ws?.setActive(s.isActive) });
+}
 
-  Promise.all(loom.map((j) => srcFor(WEAVE[j]))).then((srcs) => {
-    scene = initWeave($('#weave-canvas'), srcs, state);
-    if (visible) scene?.setActive(true);
-  });
-  gsap.timeline({ scrollTrigger: { trigger: '.weave', start: 'top top', end: '+=200%', scrub: 0.8, pin: '.weave-pin' } })
-    .to(state, { progress: 1, ease: 'none', duration: 1 }, 0);
-  ScrollTrigger.create({ trigger: '.weave', start: 'top bottom', end: 'bottom top', onToggle: (st) => { visible = st.isActive; scene?.setActive(st.isActive); } });
-})();
+/* ---------------- 12. Footer ---------------- */
+$('#news').addEventListener('submit', (e) => { e.preventDefault(); $('#news-done').hidden = false; e.target.reset(); });
+gsap.from('.footer-card', { y: 90, scale: 0.96, opacity: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: '.footer', start: 'top 92%' } });
 
-/* ---------------- Section reveals + nav state ---------------- */
-document.querySelectorAll('.section-head').forEach((el) => {
-  if (el.closest('.silks, .weave')) return;
-  gsap.from(el.children, { y: 30, opacity: 0, stagger: 0.08, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%' } });
+/* ---------------- Headings blur in, nav state ---------------- */
+$$('main .title').forEach((el) => {
+  if (el.closest('.hero')) return;
+  gsap.fromTo(el, { opacity: 0, y: 26, filter: 'blur(12px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%' } });
 });
-document.querySelectorAll('[data-section]').forEach((sec) => {
-  ScrollTrigger.create({ trigger: sec, start: 'top 50%', end: 'bottom 50%', onToggle: (st) => st.isActive && setActive(sec.dataset.section) });
+[['#home', 'home'], ['#look', 'look'], ['#silks', 'silks'], ['#rack', 'rack'], ['#muse', 'muse'], ['#drape', 'muse'], ['#reels', 'muse'], ['#bridal', 'bridal'], ['#weave', 'weave']].forEach(([sel, key]) => {
+  ScrollTrigger.create({ trigger: sel, start: 'top 50%', end: 'bottom 50%', onToggle: (s) => s.isActive && setActive(key) });
 });
-gsap.from('.footer-mark', { yPercent: 40, opacity: 0, ease: 'power2.out', scrollTrigger: { trigger: '.footer', start: 'top 80%', end: 'bottom bottom', scrub: true } });
 
 addEventListener('load', () => ScrollTrigger.refresh());
