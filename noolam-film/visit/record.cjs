@@ -78,7 +78,10 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     return p.evaluate(([sel, i, dx, dy]) => { const el = document.querySelectorAll(sel)[i]; if (!el) return null; const r = el.getBoundingClientRect(); return [r.left + r.width * dx, r.top + r.height * dy]; }, [sel, i, dx, dy]);
   }
   async function moveTo(sel, i, sec, dx, dy) { const pt = await at(sel, i, dx, dy); if (pt) await move(pt[0], pt[1], sec); else console.error('missing', sel, i); return pt; }
-  async function click(holdSec = 0.1) { await p.mouse.move(s.mx, s.my); await p.mouse.down(); await hold(0.06); await p.mouse.up(); await hold(holdSec); }
+  async function click(holdSec = 0.1) {
+    const hit = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e ? (e.id ? '#' + e.id : '') + '.' + String(e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className).split(' ').join('.') : 'none'; }, [s.mx, s.my]);
+    console.log('click', (frame / FPS).toFixed(1) + 's', hit);
+    await p.mouse.move(s.mx, s.my); await p.mouse.down(); await hold(0.06); await p.mouse.up(); await hold(holdSec); }
   async function key(k, sec) { await p.keyboard.press(k); await hold(sec); }
   const L = () => p.evaluate(() => {
     const top = (q) => document.querySelector(q).getBoundingClientRect().top + scrollY;
@@ -120,7 +123,7 @@ const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     await scrollTo(l.silks[0], 2.0);
     await scrollTo(mid(l.silks, 0.4), 3.4);
     const card = await p.evaluate(() => { const cs = [...document.querySelectorAll('.scard')]; let best = 0, bd = 1e9; cs.forEach((c, i) => { const r = c.getBoundingClientRect(); const d = Math.abs(r.left + r.width / 2 - innerWidth * 0.42); if (d < bd) { bd = d; best = i; } }); return best; });
-    await moveTo('.scard', card, 0.8, 0.35, 0.4); await move(s.mx + 120, s.my + 160, 1.1);
+    await moveTo('.scard', card, 0.8, 0.5, 0.3); await move(s.mx + 50, s.my + 36, 1.0);
     await click(1.5);
     await click(1.1);
     await scrollTo(l.silks[1], 3.2);
