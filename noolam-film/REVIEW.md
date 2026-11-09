@@ -4,10 +4,10 @@
 - Built storyline A, One Thread: a gold thread carries the film from the silk, through the lineup and showroom, into the three-silk braid and the crest. Not built: B "Pick a Silk" (hard cuts between colour fields) and C "Six Days to the Muhurtham" (a bride's day). Both are in `STORYLINES.md`.
 - The lineup-to-showroom move is an endless zoom: the eight looks turn out to be the framed panel on the showroom's back wall (the panel where the store logo was painted over in `hero-showroom.jpg`).
 - Copy is the site's own lines plus one opener ("It begins with a single thread"). The only price shown is real: Sindoor Tussar, ₹7,199.
-- Silent. The person picked a music bed, but the ElevenLabs key lives on another cloud environment and they declined adding it here. The film is made to play muted on the site.
+- Sound: the ElevenLabs Music API needs a paid plan (the account returned 402), so the bed is a 22 s tanpura-and-sitar loop from the free sound-effects API, crossfaded to length (`assets/audio/film-bed.m4a`). Effects: silk whooshes on the dive (4.1 s), the pull-back (10.3 s) and the whip (14.8 s); a temple-bell chime on the wordmark (23.02 s). The site still plays the film muted.
 
 ## Measured
-- `npx hyperframes check`: ok. Kept on purpose: `film_silent` and `audio_none` (see above), `canvas_covered` (the lineup's white ground covers the frame by design), and WebGL `console_warning` performance notes from the software renderer.
+- `npx hyperframes check`: ok. Kept on purpose: `canvas_covered` (the lineup's white ground covers the frame by design), and WebGL `console_warning` performance notes from the software renderer.
 - Snapshots at 1.8, 4.5, 5.4, 11, 13.6, 15.15–20.6 and 25.9 s, plus the review sheets (beats, seams, phone).
 
 ## Rendered
