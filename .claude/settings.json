@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "make-an-anime": {
+      "source": {
+        "source": "github",
+        "repo": "makevoid/claude-make-an-anime"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "make-an-anime@make-an-anime": true
+  }
+}
