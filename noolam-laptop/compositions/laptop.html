@@ -1,0 +1,58 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    /* Laptop, front view: lid 1348x782 (16:9 screen 1312x738), hinge, thin aluminium base. */
+    #lp-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; perspective: 2400px; perspective-origin: 50% 85%; transform-origin: 0 0; }
+    #lp-floor { position: absolute; left: 50%; top: 946px; width: 1700px; height: 70px; margin-left: -850px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(60, 30, 40, 0.28), rgba(60, 30, 40, 0) 70%); }
+    #lp-lid { position: absolute; left: 286px; top: 128px; width: 1348px; height: 782px; border-radius: 30px 30px 14px 14px; background: linear-gradient(180deg, #2a2a2f, #151518); box-shadow: inset 0 0 0 2px #8f8c95, 0 40px 80px rgba(40, 10, 20, 0.18); transform-origin: 50% 100%; }
+    #lp-cam { position: absolute; left: 50%; top: 9px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #0b0b0d; box-shadow: inset 0 0 0 1.5px #2c2c33; }
+    #lp-screen { position: absolute; left: 18px; top: 20px; width: 1312px; height: 738px; border-radius: 6px; overflow: hidden; background: #0d0d10; }
+    #lp-video { position: absolute; left: 0; top: 0; width: 1312px; height: 738px; object-fit: cover; display: block; }
+    #lp-glass { position: absolute; inset: 0; background: linear-gradient(118deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.03) 100%); pointer-events: none; }
+    #lp-hinge { position: absolute; left: 300px; top: 908px; width: 1320px; height: 12px; border-radius: 0 0 6px 6px; background: linear-gradient(180deg, #4a474e, #2a282d); }
+    #lp-base { position: absolute; left: 190px; top: 916px; width: 1540px; height: 30px; border-radius: 4px 4px 22px 22px; background: linear-gradient(180deg, #ecebee 0%, #d7d3da 35%, #aaa6ae 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 24px rgba(40, 10, 20, 0.18); }
+    #lp-notch { position: absolute; left: 50%; top: 0; width: 230px; height: 9px; margin-left: -115px; border-radius: 0 0 10px 10px; background: linear-gradient(180deg, #a19da6, #c4c0c8); }
+  </style>
+  <div id="root" data-composition-id="laptop" data-width="1920" data-height="1080">
+    <div id="lp-stage">
+      <div id="lp-floor"></div>
+      <div id="lp-base"><div id="lp-notch"></div></div>
+      <div id="lp-hinge"></div>
+      <div id="lp-lid">
+        <span id="lp-cam"></span>
+        <div id="lp-screen">
+          <video id="lp-video" class="clip" src="assets/visit-hi.mp4" data-start="0" data-duration="121.03" data-track-index="2" muted playsinline></video>
+          <div id="lp-glass"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // Screen rectangle inside the stage, and the recording's coordinate space (CSS px).
+      const SX = 304, SY = 148, SW = 1312, SH = 738, VW = 1920, VH = 1080;
+      const CLOSE = 1.36; // the screen fills the frame with a thin bezel showing
+      const WIDE = { x: 0, y: 0, scale: 1 };
+      function cam(vx, vy, z) {
+        const k = CLOSE * z;
+        const px = SX + (vx * SW) / VW, py = SY + (vy * SH) / VH;
+        let x = 960 - k * px, y = 540 - k * py;
+        // Once the screen is larger than the frame, keep its edges outside the frame.
+        x = k * SW >= 1920 ? Math.min(-k * SX, Math.max(1920 - k * (SX + SW), x)) : 960 - k * (SX + SW / 2);
+        y = k * SH >= 1080 ? Math.min(-k * SY, Math.max(1080 - k * (SY + SH), y)) : 540 - k * (SY + SH / 2);
+        return { x, y, scale: k };
+      }
+      const target = (t) => (t === "wide" ? WIDE : t === "close" ? cam(960, 540, 1) : cam(t[0], t[1], t[2]));
+      /* CAMERA-KEYS */ const KEYS = [[1.8, "close", 1.4], [6.4, [520, 760, 1.35], 1.0], [10.6, "close", 0.9], [12.8, [470, 330, 1.3], 0.9], [14.2, "close", 0.9], [16.8, [960, 600, 1.18], 0.9], [20.2, "close", 0.8], [23.4, [760, 640, 1.2], 0.8], [27.2, [900, 560, 1.12], 0.8], [32.833, [1393, 391, 1.45], 0.6], [35.2, "close", 0.7], [43.267, [724, 616, 1.4], 0.7], [46.667, "close", 0.7], [54.067, [676, 278, 1.4], 0.6], [55.567, [960, 620, 1.12], 0.8], [58.933, [960, 560, 1.28], 0.7], [60.7, [1014, 584, 1.5], 0.5], [62.967, "close", 0.7], [69.333, [384, 178, 1.35], 0.6], [71.033, "close", 0.7], [73.6, [960, 470, 1.45], 1.0], [77.4, "close", 0.8], [83.7, [960, 540, 1.3], 0.8], [89.3, "close", 0.7], [92.067, [960, 600, 1.12], 0.9], [98.467, "close", 0.7], [101.667, [771, 944, 1.4], 0.6], [107.6, "close", 1.0], [111.767, [1762, 919, 1.4], 0.6], [113.367, "close", 0.8], [115.633, "wide", 1.6]]; /* /CAMERA-KEYS */
+
+      const tl = gsap.timeline({ paused: true });
+      // The lid opens while the camera settles on the whole laptop.
+      tl.fromTo("#lp-lid", { rotationX: -62 }, { rotationX: 0, duration: 1.3, ease: "power3.out" }, 0.05);
+      tl.fromTo("#lp-stage", { x: 67, y: 68, scale: 0.93 }, { x: 0, y: 0, scale: 1, duration: 1.7, ease: "power2.inOut" }, 0);
+      // Then the camera moves in close and follows each section of the visit.
+      KEYS.forEach(([t, to, d]) => tl.to("#lp-stage", { ...target(to), duration: d, ease: "power2.inOut" }, t));
+      tl.to({}, { duration: 0.1 }, 120.8);
+      window.__timelines["laptop"] = tl;
+    })();
+  </script>
+</template>

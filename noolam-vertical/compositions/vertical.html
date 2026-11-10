@@ -1,0 +1,104 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #e7ded3; }
+    #v-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; }
+    /* Soft cream silk backdrop, drawn as blurred folds; oversized so camera moves never show an edge. */
+    #v-bg { position: absolute; left: -1080px; top: -1920px; width: 3240px; height: 5760px; }
+    #v-table { position: absolute; left: -1080px; top: 1270px; width: 3240px; height: 2400px; background: linear-gradient(180deg, #ece5dc 0%, #e3dacf 40%, #d8cdc1 100%); }
+    #v-shadow { position: absolute; left: 70px; top: 1205px; width: 1000px; height: 150px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(70, 50, 40, 0.38), rgba(70, 50, 40, 0) 70%); }
+    #v-scene { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1700px; perspective-origin: 50% 38%; }
+    /* The laptop: hinge line at (560, 1080) of the scene. */
+    #v-laptop { position: absolute; left: 560px; top: 1080px; width: 0; height: 0; transform-style: preserve-3d; transform: rotateX(-16deg) rotateY(18deg) rotateZ(-1deg); }
+    #v-deck { position: absolute; left: -430px; top: 0; width: 860px; height: 560px; transform-origin: 50% 0; transform: rotateX(90deg); border-radius: 0 0 26px 26px; background: linear-gradient(180deg, #6c6c72 0%, #5d5d63 60%, #4f4f55 100%); box-shadow: inset 0 0 0 2px #77777e; }
+    #v-keys { position: absolute; left: 66px; top: 34px; width: 728px; height: 300px; display: grid; grid-template-columns: repeat(14, 1fr); grid-template-rows: 0.6fr repeat(5, 1fr); gap: 7px; padding: 10px; border-radius: 10px; background: #3d3d42; }
+    #v-keys i { display: block; border-radius: 6px; background: linear-gradient(180deg, #2c2c31, #1f1f23); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+    #v-keys i.w2 { grid-column: span 2; } #v-keys i.w6 { grid-column: span 6; }
+    #v-pad { position: absolute; left: 270px; top: 360px; width: 320px; height: 176px; border-radius: 14px; background: linear-gradient(180deg, #67676d, #5a5a60); box-shadow: inset 0 0 0 1.5px #74747b; }
+    #v-lid { position: absolute; left: -430px; top: -540px; width: 860px; height: 540px; transform-origin: 50% 100%; transform: rotateX(12deg); border-radius: 26px 26px 10px 10px; background: linear-gradient(180deg, #19191c, #0f0f11); box-shadow: inset 0 0 0 3px #6d6d73; }
+    #v-notch { position: absolute; left: 50%; top: 0; width: 120px; height: 20px; margin-left: -60px; border-radius: 0 0 10px 10px; background: #0b0b0d; z-index: 3; }
+    #v-screen { position: absolute; left: 18px; top: 18px; width: 824px; height: 504px; border-radius: 12px; overflow: hidden; background: #f4efe9; }
+    #v-video { position: absolute; left: 0; top: 41px; width: 824px; height: 463.5px; object-fit: cover; display: block; }
+    #v-topbar { position: absolute; left: 0; top: 0; width: 824px; height: 41px; background: #f4efe9; }
+    #v-glass { position: absolute; inset: 0; background: linear-gradient(120deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.05) 100%); pointer-events: none; }
+    #v-probe { position: absolute; width: 2px; height: 2px; left: 0; top: 0; }
+  </style>
+  <div id="root" data-composition-id="vertical" data-width="1080" data-height="1920">
+    <div id="v-cam" data-layout-allow-overflow>
+      <svg id="v-bg" viewBox="0 0 3240 5760" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="v-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efe8df" /><stop offset="1" stop-color="#ddd2c6" /></linearGradient>
+          <filter id="v-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="38" /></filter>
+        </defs>
+        <rect width="3240" height="5760" fill="url(#v-g)" />
+        <g filter="url(#v-soft)">
+          <path d="M-100 2050 C 600 1880 1100 2280 1800 2030 S 3000 1800 3400 1960 L 3400 2060 C 2800 1990 2200 2380 1500 2210 S 400 2120 -100 2260 Z" fill="#cdbfb0" opacity="0.7" />
+          <path d="M-100 2480 C 800 2250 1400 2800 2100 2470 S 3100 2250 3400 2420 L 3400 2560 C 2800 2470 2200 2900 1500 2700 S 400 2650 -100 2800 Z" fill="#c8b9a9" opacity="0.65" />
+          <path d="M-100 2300 C 700 1950 1300 2650 2000 2250 S 3100 1900 3400 2150 L 3400 2450 C 2900 2250 2300 2750 1700 2550 S 500 2500 -100 2700 Z" fill="#fcf9f5" />
+          <path d="M-100 2750 C 600 2500 1200 3050 1900 2750 S 3000 2500 3400 2700 L 3400 2900 C 2800 2800 2200 3150 1500 2980 S 400 2950 -100 3100 Z" fill="#cbbdad" />
+          <path d="M-100 1900 C 800 1700 1500 2150 2200 1850 S 3100 1650 3400 1800 L 3400 1950 C 2700 1900 2100 2250 1400 2100 S 300 2000 -100 2150 Z" fill="#f4eee6" />
+          <path d="M-100 3150 C 700 2950 1400 3400 2100 3150 S 3000 3000 3400 3100 L 3400 3260 C 2700 3200 2000 3500 1300 3330 S 300 3300 -100 3400 Z" fill="#e9e0d5" />
+        </g>
+      </svg>
+      <div id="v-table"></div>
+      <div id="v-shadow"></div>
+      <div id="v-scene">
+        <div id="v-laptop">
+          <div id="v-deck">
+            <div id="v-keys">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              <i class="w2"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              <i class="w2"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="w2"></i>
+              <i class="w2"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="w2"></i><i></i>
+              <i></i><i></i><i></i><i class="w2"></i><i class="w6"></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div id="v-pad"></div>
+          </div>
+          <div id="v-lid">
+            <span id="v-notch"></span>
+            <div id="v-screen">
+              <div id="v-topbar"></div>
+              <video id="v-video" class="clip" src="assets/visit-hi.mp4" data-start="0" data-duration="121.03" data-track-index="2" muted playsinline></video>
+              <span id="v-probe"></span>
+              <div id="v-glass"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // Camera: a 2D move over the rendered 3D laptop. Points on the website are measured
+      // where they land on the angled screen, once, before the timeline is built.
+      const VW = 1920, VH = 1080, SCR_W = 824, VID_TOP = 41, VID_H = 463.5;
+      const AIM = { x: 540, y: 860 }; // keep the action above Instagram's caption area
+      const camEl = document.getElementById("v-cam"), probe = document.getElementById("v-probe");
+      function project(vx, vy) {
+        probe.style.left = (vx * SCR_W) / VW + "px";
+        probe.style.top = VID_TOP + (vy * VID_H) / VH + "px";
+        const c = camEl.getBoundingClientRect(), r = probe.getBoundingClientRect();
+        const f = c.width / 1080 || 1;
+        return { x: (r.left - c.left) / f, y: (r.top - c.top) / f };
+      }
+      const left = project(0, 540), right = project(VW, 540);
+      const screenW = Math.max(200, right.x - left.x);
+      const CLOSE = 1080 / screenW; // the screen spans the frame width
+      function cam(vx, vy, z) {
+        const p = project(vx, vy), k = CLOSE * z;
+        return { x: AIM.x - k * p.x, y: AIM.y - k * p.y, scale: k };
+      }
+      const WIDE = { x: 0, y: 0, scale: 1 };
+      const target = (t) => (t === "wide" ? WIDE : t === "close" ? cam(960, 540, 1) : cam(t[0], t[1], t[2]));
+      /* CAMERA-KEYS */ const KEYS = [[2.2, "close", 1.4], [6.4, [520, 760, 1.35], 1.0], [10.6, "close", 0.9], [12.8, [470, 330, 1.3], 0.9], [14.2, "close", 0.9], [16.8, [960, 600, 1.18], 0.9], [20.2, "close", 0.8], [23.4, [760, 640, 1.2], 0.8], [27.2, [900, 560, 1.12], 0.8], [32.833, [1393, 391, 1.45], 0.6], [35.2, "close", 0.7], [43.267, [724, 616, 1.4], 0.7], [46.667, "close", 0.7], [54.067, [676, 278, 1.4], 0.6], [55.567, [960, 620, 1.12], 0.8], [58.933, [960, 560, 1.28], 0.7], [60.7, [1014, 584, 1.5], 0.5], [62.967, "close", 0.7], [69.333, [384, 178, 1.35], 0.6], [71.033, "close", 0.7], [73.6, [960, 470, 1.45], 1.0], [77.4, "close", 0.8], [83.7, [960, 540, 1.3], 0.8], [89.3, "close", 0.7], [92.067, [960, 600, 1.12], 0.9], [98.467, "close", 0.7], [101.667, [771, 944, 1.4], 0.6], [107.6, "close", 1.0], [111.767, [1762, 919, 1.4], 0.6], [113.367, "close", 0.8], [115.633, "wide", 1.6]]; /* /CAMERA-KEYS */
+      const plan = KEYS.map(([t, to, d]) => [t, target(to), d]);
+      probe.style.left = "0px"; probe.style.top = "0px";
+
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#v-cam", { x: -43, y: -77, scale: 1.08 }, { x: 0, y: 0, scale: 1, duration: 1.8, ease: "power2.out" }, 0);
+      plan.forEach(([t, to, d]) => tl.to("#v-cam", { ...to, duration: d, ease: "power2.inOut" }, t));
+      tl.to({}, { duration: 0.1 }, 120.8);
+      window.__timelines["vertical"] = tl;
+    })();
+  </script>
+</template>
